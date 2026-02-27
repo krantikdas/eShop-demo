@@ -26,6 +26,15 @@ on:
           - qa
           - uat
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   integration-tests:
     name: Run Integration Tests
@@ -89,3 +98,28 @@ jobs:
           name: integration-test-traces
           path: tests/playwright/test-results/
           retention-days: 14
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        if: always()
+        with:
+          path: tests/playwright/allure-report/
+
+  deploy-report:
+    name: Deploy Allure Report to GitHub Pages
+    needs: integration-tests
+    if: always()
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
