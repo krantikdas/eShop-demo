@@ -101,14 +101,14 @@ jobs:
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
-        if: always()
+        if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         with:
           path: tests/playwright/allure-report/
 
   deploy-report:
     name: Deploy Allure Report to GitHub Pages
     needs: integration-tests
-    if: always()
+    if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
 
     permissions:
