@@ -94,7 +94,8 @@ app.get('/api/catalog/items', (req, res) => {
   const totalItems = filtered.length;
   const data = filtered.slice(pageSize * pageIndex, pageSize * pageIndex + pageSize);
 
-  res.json({ pageIndex, pageSize, count: totalItems, data });
+  // BREAKING CHANGE: renamed 'count' -> 'totalCount' and 'data' -> 'items' (API v2 refactor)
+  res.json({ pageIndex, pageSize, totalCount: totalItems, items: data });
 });
 
 // GET /api/catalog/items/by?ids=1&ids=2 - Batch get
@@ -132,7 +133,8 @@ app.get('/api/catalog/items/by/:name', (req, res) => {
   const totalItems = filtered.length;
   const data = filtered.slice(pageSize * pageIndex, pageSize * pageIndex + pageSize);
 
-  res.json({ pageIndex, pageSize, count: totalItems, data });
+  // BREAKING CHANGE: renamed fields
+  res.json({ pageIndex, pageSize, totalCount: totalItems, items: data });
 });
 
 // GET /api/catalog/items/withsemanticrelevance/:text - Semantic search (mocked as name search)
@@ -151,7 +153,8 @@ app.get('/api/catalog/items/withsemanticrelevance/:text', (req, res) => {
   const totalItems = filtered.length;
   const data = filtered.slice(pageSize * pageIndex, pageSize * pageIndex + pageSize);
 
-  res.json({ pageIndex, pageSize, count: totalItems, data });
+  // BREAKING CHANGE: renamed fields
+  res.json({ pageIndex, pageSize, totalCount: totalItems, items: data });
 });
 
 // GET /api/catalog/items/withsemanticrelevance?text=... (v2)
@@ -173,7 +176,8 @@ app.get('/api/catalog/items/withsemanticrelevance', (req, res) => {
   const totalItems = filtered.length;
   const data = filtered.slice(pageSize * pageIndex, pageSize * pageIndex + pageSize);
 
-  res.json({ pageIndex, pageSize, count: totalItems, data });
+  // BREAKING CHANGE: renamed fields
+  res.json({ pageIndex, pageSize, totalCount: totalItems, items: data });
 });
 
 // GET /api/catalog/items/type/:typeId/brand/:brandId? - Filter by type and brand
@@ -192,7 +196,8 @@ app.get('/api/catalog/items/type/:typeId/brand/:brandId?', (req, res) => {
   const totalItems = filtered.length;
   const data = filtered.slice(pageSize * pageIndex, pageSize * pageIndex + pageSize);
 
-  res.json({ pageIndex, pageSize, count: totalItems, data });
+  // BREAKING CHANGE: renamed fields
+  res.json({ pageIndex, pageSize, totalCount: totalItems, items: data });
 });
 
 // GET /api/catalog/items/type/all/brand/:brandId? - Filter by brand only
@@ -209,7 +214,8 @@ app.get('/api/catalog/items/type/all/brand/:brandId?', (req, res) => {
   const totalItems = filtered.length;
   const data = filtered.slice(pageSize * pageIndex, pageSize * pageIndex + pageSize);
 
-  res.json({ pageIndex, pageSize, count: totalItems, data });
+  // BREAKING CHANGE: renamed fields
+  res.json({ pageIndex, pageSize, totalCount: totalItems, items: data });
 });
 
 // GET /api/catalogtypes
@@ -273,14 +279,15 @@ app.put('/api/catalog/items/:id', (req, res) => {
 });
 
 // DELETE /api/catalog/items/:id
+// BREAKING CHANGE: now returns 200 with deleted item instead of 204 No Content
 app.delete('/api/catalog/items/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const idx = catalogItems.findIndex(i => i.id === id);
   if (idx === -1) {
     return res.status(404).json({});
   }
-  catalogItems.splice(idx, 1);
-  res.status(204).send();
+  const deleted = catalogItems.splice(idx, 1)[0];
+  res.status(200).json({ deleted: true, item: deleted });
 });
 
 // ─── BASKET API (/api/basket) - mocked REST for gRPC ────────────────────────────
