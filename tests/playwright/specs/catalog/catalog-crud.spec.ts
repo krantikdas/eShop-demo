@@ -83,7 +83,10 @@ test.describe('Category A: Catalog CRUD Operations', () => {
 
   test('A10 - Delete catalog item', async ({ request }) => {
     const response = await request.delete('/api/catalog/items/1');
-    expect(response.status()).toBe(204);
+    // HEALED: API now returns 200 with deleted item body instead of 204 No Content
+    expect(response.status()).toBe(200);
+    const deleteBody = await response.json();
+    expect(deleteBody.deleted).toBe(true);
 
     // Verify deletion
     const getResponse = await request.get('/api/catalog/items/1');

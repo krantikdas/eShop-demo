@@ -12,8 +12,9 @@ test.describe('Category G: Error Handling & Edge Cases', () => {
     const response = await request.get('/api/catalog/items?pageIndex=999');
     expect(response.status()).toBe(200);
     const body = await response.json();
-    expect(body.data).toHaveLength(0);
-    expect(body.count).toBeGreaterThan(0); // Count still reflects total
+    // HEALED: 'data' -> 'items', 'count' -> 'totalCount'
+    expect(body.items).toHaveLength(0);
+    expect(body.totalCount).toBeGreaterThan(0); // Count still reflects total
   });
 
   test('G02 - Batch get with empty IDs returns empty array', async ({ request }) => {
@@ -27,8 +28,9 @@ test.describe('Category G: Error Handling & Edge Cases', () => {
     const response = await request.get('/api/catalog/items/type/999/brand/999');
     expect(response.status()).toBe(200);
     const body = await response.json();
-    expect(body.data).toHaveLength(0);
-    expect(body.count).toBe(0);
+    // HEALED: 'data' -> 'items', 'count' -> 'totalCount'
+    expect(body.items).toHaveLength(0);
+    expect(body.totalCount).toBe(0);
   });
 
   test('G04 - Semantic search with no matches returns empty data', async ({ request }) => {
@@ -37,7 +39,8 @@ test.describe('Category G: Error Handling & Edge Cases', () => {
     );
     expect(response.status()).toBe(200);
     const body = await response.json();
-    expect(body.data).toHaveLength(0);
+    // HEALED: 'data' -> 'items'
+    expect(body.items).toHaveLength(0);
   });
 
   test('G05 - Create catalog item with minimal fields', async ({ request }) => {
@@ -183,6 +186,7 @@ test.describe('Category G: Error Handling & Edge Cases', () => {
     const response = await request.get('/api/catalog/items?pageSize=200');
     expect(response.status()).toBe(200);
     const body = await response.json();
-    expect(body.data.length).toBe(body.count); // All items on one page
+    // HEALED: 'data' -> 'items', 'count' -> 'totalCount'
+    expect(body.items.length).toBe(body.totalCount); // All items on one page
   });
 });

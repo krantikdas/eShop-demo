@@ -12,8 +12,9 @@ test.describe('Category B: Catalog Query & Filtering', () => {
     const body = await response.json();
     expect(body.pageIndex).toBe(0);
     expect(body.pageSize).toBe(10);
-    expect(body.count).toBeGreaterThan(0);
-    expect(body.data.length).toBeLessThanOrEqual(10);
+    // HEALED: API renamed 'count' -> 'totalCount' and 'data' -> 'items'
+    expect(body.totalCount).toBeGreaterThan(0);
+    expect(body.items.length).toBeLessThanOrEqual(10);
   });
 
   test('B02 - List catalog items with custom page size', async ({ request }) => {
@@ -21,7 +22,8 @@ test.describe('Category B: Catalog Query & Filtering', () => {
     expect(response.status()).toBe(200);
     const body = await response.json();
     expect(body.pageSize).toBe(5);
-    expect(body.data.length).toBeLessThanOrEqual(5);
+    // HEALED: 'data' -> 'items'
+    expect(body.items.length).toBeLessThanOrEqual(5);
   });
 
   test('B03 - List catalog items page 2', async ({ request }) => {
@@ -29,21 +31,24 @@ test.describe('Category B: Catalog Query & Filtering', () => {
     expect(response.status()).toBe(200);
     const body = await response.json();
     expect(body.pageIndex).toBe(1);
-    expect(body.data.length).toBeGreaterThan(0);
+    // HEALED: 'data' -> 'items'
+    expect(body.items.length).toBeGreaterThan(0);
   });
 
   test('B04 - Total count remains consistent across pages', async ({ request }) => {
     const page0 = await (await request.get('/api/catalog/items?pageSize=5&pageIndex=0')).json();
     const page1 = await (await request.get('/api/catalog/items?pageSize=5&pageIndex=1')).json();
-    expect(page0.count).toBe(page1.count);
+    // HEALED: 'count' -> 'totalCount'
+    expect(page0.totalCount).toBe(page1.totalCount);
   });
 
   test('B05 - Filter items by name', async ({ request }) => {
     const response = await request.get('/api/catalog/items?name=Alpine');
     expect(response.status()).toBe(200);
     const body = await response.json();
-    expect(body.data.length).toBeGreaterThan(0);
-    for (const item of body.data) {
+    // HEALED: 'data' -> 'items'
+    expect(body.items.length).toBeGreaterThan(0);
+    for (const item of body.items) {
       expect(item.name.toLowerCase()).toMatch(/^alpine/i);
     }
   });
@@ -71,7 +76,8 @@ test.describe('Category B: Catalog Query & Filtering', () => {
     const response = await request.get('/api/catalog/items/type/1/brand/1');
     expect(response.status()).toBe(200);
     const body = await response.json();
-    for (const item of body.data) {
+    // HEALED: 'data' -> 'items'
+    for (const item of body.items) {
       expect(item.catalogTypeId).toBe(1);
       expect(item.catalogBrandId).toBe(1);
     }
@@ -81,7 +87,8 @@ test.describe('Category B: Catalog Query & Filtering', () => {
     const response = await request.get('/api/catalog/items/type/1/brand');
     expect(response.status()).toBe(200);
     const body = await response.json();
-    for (const item of body.data) {
+    // HEALED: 'data' -> 'items'
+    for (const item of body.items) {
       expect(item.catalogTypeId).toBe(1);
     }
   });
@@ -108,9 +115,10 @@ test.describe('Category B: Catalog Query & Filtering', () => {
     const response = await request.get('/api/catalog/items/withsemanticrelevance/boot');
     expect(response.status()).toBe(200);
     const body = await response.json();
-    expect(body.data.length).toBeGreaterThan(0);
+    // HEALED: 'data' -> 'items'
+    expect(body.items.length).toBeGreaterThan(0);
     // At least one result should contain "boot" in name or description
-    const hasRelevant = body.data.some(
+    const hasRelevant = body.items.some(
       (i: { name: string; description: string }) =>
         i.name.toLowerCase().includes('boot') || i.description.toLowerCase().includes('boot')
     );
