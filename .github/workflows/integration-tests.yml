@@ -53,12 +53,33 @@ jobs:
         env:
           CI: true
 
-      - name: Upload HTML report
+      - name: Generate Allure report
+        working-directory: tests/playwright
+        if: always()
+        run: npx allure generate ./allure-results -o ./allure-report --clean
+
+      - name: Upload Playwright HTML report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: integration-test-report
+          name: playwright-html-report
           path: tests/playwright/playwright-report/
+          retention-days: 30
+
+      - name: Upload Allure report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report
+          path: tests/playwright/allure-report/
+          retention-days: 30
+
+      - name: Upload Allure results (for history)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results
+          path: tests/playwright/allure-results/
           retention-days: 30
 
       - name: Upload trace files

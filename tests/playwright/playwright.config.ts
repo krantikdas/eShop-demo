@@ -9,6 +9,7 @@ export default defineConfig({
   reporter: [
     ['html', { open: 'never' }],
     ['list'],
+    ['allure-playwright', { resultsDir: './allure-results', detail: true, suiteTitle: true }],
   ],
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:5045',
