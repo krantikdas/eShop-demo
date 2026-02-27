@@ -1,0 +1,70 @@
+name: Integration Tests (Playwright)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/integration-tests.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/integration-tests.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (mock, sit, qa, uat)'
+        required: false
+        default: 'mock'
+        type: choice
+        options:
+          - mock
+          - sit
+          - qa
+          - uat
+
+jobs:
+  integration-tests:
+    name: Run Integration Tests
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install mock server dependencies
+        working-directory: tests/mock-server
+        run: npm ci
+
+      - name: Install Playwright test dependencies
+        working-directory: tests/playwright
+        run: npm ci
+
+      - name: Run integration tests
+        working-directory: tests/playwright
+        run: npx playwright test --trace on
+        env:
+          CI: true
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-report
+          path: tests/playwright/playwright-report/
+          retention-days: 30
+
+      - name: Upload trace files
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: integration-test-traces
+          path: tests/playwright/test-results/
+          retention-days: 14

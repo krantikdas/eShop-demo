@@ -1,0 +1,15 @@
+{
+  "name": "eshop-integration-tests",
+  "version": "1.0.0",
+  "description": "Playwright integration tests for eShop microservices",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:trace": "npx playwright test --trace on",
+    "test:headed": "npx playwright test --headed",
+    "report": "npx playwright show-report",
+    "mock-server": "cd ../mock-server && node server.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0"
+  }
+}
