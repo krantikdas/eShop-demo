@@ -1,144 +1,248 @@
-# Devin Playwright Integration Testing Playbook
+# Devin Playwright Integration Testing — Demo Playbooks
 
 ## Overview
 
-This document describes how to use Devin as an automated Playwright testing agent triggered by code commits to the eShop-demo repository. It covers the end-to-end demo flow for clients.
+This document provides two Devin Playbooks and step-by-step demo scripts for presenting automated integration testing to clients. The demos show how a code commit to GitHub triggers automated Playwright tests, and how Devin can self-heal failing tests.
 
 ---
 
-## Demo Flow: Code Commit Triggers Integration Tests
+## Prerequisites (Before the Demo)
 
-### What Happens Automatically (GitHub Actions)
-
-When a developer pushes code to `main` or opens a PR that modifies `src/` or `tests/`:
-
-1. **GitHub Actions** triggers the `Integration Tests (Playwright)` workflow
-2. The workflow installs the mock server and Playwright dependencies
-3. **76 integration tests** run automatically against the mock server
-4. HTML report and trace artifacts are uploaded to GitHub Actions
-5. PR gets a green/red check status
-
-This is already configured in `.github/workflows/integration-tests.yml`.
-
-### What Devin Adds on Top (The Agent Layer)
-
-For a richer demo, use Devin Playbooks to go beyond basic CI:
+1. **GitHub repo:** `https://github.com/krantikdas/eShop-demo` with PR #1 merged to `main`
+2. **Devin session** with access to the repo (GitHub PAT saved as `GITHUB_PAT` secret)
+3. **Allure report** live at `https://krantikdas.github.io/eShop-demo/` (auto-published after merge)
+4. **Browser tabs open:**
+   - GitHub repo: `https://github.com/krantikdas/eShop-demo`
+   - GitHub Actions: `https://github.com/krantikdas/eShop-demo/actions`
+   - Allure report: `https://krantikdas.github.io/eShop-demo/`
+   - Devin session: `https://app.devin.ai`
 
 ---
 
 ## Playbook 1: Run Integration Tests
 
-**Trigger:** Manual or on-demand via Devin UI/API
+**Purpose:** Demo 1 — Show a code change triggering automated regression tests.
 
-**Instructions for Devin:**
+### Devin Playbook Instructions
+
+Create this as a Devin Playbook (saved instruction set) with the name **"Run Integration Tests"**:
+
 ```
-Clone https://github.com/krantikdas/eShop-demo.git
-Navigate to tests/playwright
-Run: npm install
-Run: npx playwright test --trace on
-Summarize the results: total tests, passed, failed, duration
-If any tests fail, analyze the trace files and report root cause
-Generate an HTML report screenshot
-```
+You are a Playwright integration testing agent for the eShop-demo .NET microservices repository.
 
----
-
-## Playbook 2: Run Tests Against a Live Environment
-
-**Trigger:** When a SIT/QA/UAT environment is available
-
-**Instructions for Devin:**
-```
-Clone https://github.com/krantikdas/eShop-demo.git
-Navigate to tests/playwright
-Run: npm install
-Run: BASE_URL={environment_url} npx playwright test --trace on
-Summarize results with environment context
-Compare results to last known baseline
-Report any environment-specific failures vs test logic failures
-```
-
-**Environment URLs (to be configured as Devin secrets):**
-- SIT: `SIT_BASE_URL`
-- QA: `QA_BASE_URL`
-- UAT: `UAT_BASE_URL`
-- PROD (smoke): `PROD_BASE_URL`
-
----
-
-## Playbook 3: Analyze Test Failures and Self-Heal
-
-**Trigger:** When CI reports test failures on a PR
-
-**Instructions for Devin:**
-```
-Check the PR at {pr_url} for failed integration test checks
-Download the trace artifacts from the failed GitHub Actions run
-Analyze each failure: is it a test issue or a code issue?
-If test issue: fix the test and push a commit to the PR branch
-If code issue: create a detailed bug report comment on the PR
-Re-run the tests to verify the fix
+1. Clone https://github.com/krantikdas/eShop-demo.git (or pull latest if already cloned)
+2. Create a new branch from main: devin/{timestamp}-integration-test-run
+3. Navigate to tests/playwright
+4. Run: npm install
+5. Run: npx playwright test --trace on
+6. Summarize the results:
+   - Total tests, passed, failed, skipped
+   - Duration
+   - Any failures with root cause analysis from trace files
+7. Run: npm run allure:generate
+8. Take a screenshot of the Allure report overview
+9. Report back with:
+   - Pass/fail summary
+   - Link to the GitHub Actions run (if triggered via CI)
+   - Any recommendations
 ```
 
 ---
 
-## Playbook 4: Generate New Tests for Code Changes
+## Playbook 2: Self-Heal Failing Tests
 
-**Trigger:** When new API endpoints are added
+**Purpose:** Demo 2 — Show Devin detecting test failures from a breaking API change and automatically fixing the tests.
 
-**Instructions for Devin:**
+### Devin Playbook Instructions
+
+Create this as a Devin Playbook with the name **"Self-Heal Failing Tests"**:
+
 ```
-Review the diff on PR {pr_url}
-Identify any new or modified API endpoints in src/
-For each new endpoint, generate Playwright integration tests following the existing patterns in tests/playwright/specs/
-Add tests to the appropriate spec file (catalog/, ordering/, basket/, webhooks/)
-Run the full test suite to ensure no regressions
-Push the new tests to the PR branch
+You are a Playwright test healing agent for the eShop-demo repository.
+
+1. Clone https://github.com/krantikdas/eShop-demo.git (or pull latest if already cloned)
+2. Checkout the branch: {branch_name}
+3. Navigate to tests/playwright
+4. Run: npm install
+5. Run: npx playwright test 2>&1
+6. If all tests pass, report "All 76 tests passing — no healing needed"
+7. If any tests fail:
+   a. Analyze each failure's error message and stack trace
+   b. Identify the root cause (API contract change, renamed fields, changed status codes, etc.)
+   c. Update the test assertions to match the new API behavior
+   d. Add a "// HEALED:" comment on each changed line explaining what changed and why
+   e. Run: npx playwright test (verify the fix)
+   f. If all tests pass: commit with message "fix(tests): self-heal tests to match new API contract" and push
+   g. If tests still fail: report the remaining failures for manual review
+8. Summarize what was healed: number of tests fixed, what changed, which files were modified
 ```
 
 ---
 
-## Client Demo Script (Step-by-Step)
+## Demo 1 — Step-by-Step Script: Automated Regression on Code Change
 
-### Prerequisites
-- GitHub repo: `krantikdas/eShop-demo`
-- Devin session connected to the repo
+**Narrative:** *"Watch what happens when a developer commits a code change — the full regression suite runs automatically."*
 
-### Demo Steps
+### Step 1: Show the Starting Point (1 min)
+- Open the GitHub repo in browser
+- Show the `tests/playwright/specs/` folder — *"We have 76 automated integration tests covering 4 microservices"*
+- Show the Allure report at `https://krantikdas.github.io/eShop-demo/` — *"This is our current test dashboard — 100% passing"*
 
-1. **Show the codebase** — Open the repo, show the microservices architecture (4 APIs)
+### Step 2: Make a Code Change (1 min)
+- In Devin, say: *"Make a small documentation change to the README in eShop-demo and open a PR to main"*
+- Or manually: open any file in `src/` in GitHub, click Edit, add a comment like `// Performance optimization v2`, commit to a new branch, and create a PR
 
-2. **Show the test plan** — Open `INTEGRATION_TEST_PLAN.md`, walk through the 7 test categories
+### Step 3: Watch CI Trigger Automatically (2-3 min)
+- Switch to the **GitHub Actions** tab
+- *"Notice the 'Integration Tests (Playwright)' workflow has been triggered automatically by the PR"*
+- Click into the running workflow
+- Show the live logs — you'll see:
+  - `Install mock server dependencies`
+  - `Install Playwright test dependencies`
+  - `Run integration tests` — this shows test-by-test progress
+  - `Generate Allure report`
+  - Artifact uploads
 
-3. **Show the test code** — Browse `tests/playwright/specs/` to show the automated tests
+### Step 4: Show the Results (1 min)
+- Once complete, show the green checkmark on the workflow
+- Go back to the PR page — show the green CI status check: *"Integration Tests (Playwright) — All checks passed"*
+- Click into the workflow run, scroll to **Artifacts**, show:
+  - `playwright-html-report` — Playwright's built-in report
+  - `allure-report` — Rich visual dashboard
+  - `allure-results` — Raw data for trend analysis
 
-4. **Trigger a test run** — Either:
-   - Push a small code change to trigger GitHub Actions automatically
-   - Or ask Devin: *"Run the integration tests on eShop-demo and report results"*
+### Step 5: Show the Allure Report (1 min)
+- If this was a push to main (after merge): open `https://krantikdas.github.io/eShop-demo/`
+- If this was a PR: download the `allure-report` artifact, unzip, open `index.html`
+- Walk through:
+  - **Overview** — 76 tests, 100% pass rate, duration
+  - **Suites** — 7 test suites broken down by service
+  - **Graphs** — visual pass/fail distribution
+  - **Timeline** — execution timeline showing test ordering
 
-5. **Show results in real-time** — Watch Devin execute tests, see pass/fail in the terminal
+### Key Talking Points for Demo 1
+- *"Zero manual effort — the developer just pushes code and gets instant feedback"*
+- *"76 tests covering Catalog, Basket, Ordering, Webhooks, and cross-service flows"*
+- *"Full traceability — every test maps back to a specific API endpoint"*
+- *"Rich reporting — not just pass/fail, but traces, timing, and visual dashboards"*
 
-6. **Show the CI integration** — Open the GitHub Actions tab, show the Integration Tests workflow passing
+---
 
-7. **Show the HTML report** — Download the artifact from GitHub Actions, open the Playwright HTML report
+## Demo 2 — Step-by-Step Script: Self-Healing on Breaking Change
 
-8. **Show trace analysis** — Click into a test trace to show the API call timeline, request/response details
+**Narrative:** *"Now watch what happens when a developer makes a breaking API change — Devin detects the failures and fixes the tests automatically."*
 
-9. **Demonstrate self-healing** — Introduce a deliberate test breakage, ask Devin to fix it
+### Step 1: Introduce the Breaking Change (1 min)
+- In Devin or directly in GitHub, make a breaking change to the mock server. The pre-prepared change is:
+  - Open `tests/mock-server/server.js`
+  - On the catalog list endpoint, change the pagination response fields:
+    ```js
+    // BEFORE:
+    res.json({ pageIndex, pageSize, count: totalItems, data });
 
-10. **Show multi-environment support** — Explain how `BASE_URL` switches between mock/SIT/QA/UAT/Prod
+    // AFTER:
+    res.json({ pageIndex, pageSize, totalCount: totalItems, items: data });
+    ```
+  - *"This simulates a backend developer renaming API response fields — a common real-world scenario"*
+- Commit and push to a new branch, open a PR
 
-### Key Talking Points
+### Step 2: Watch CI Fail (2-3 min)
+- Switch to **GitHub Actions** tab
+- The workflow triggers automatically
+- *"Watch the test run — you'll see failures appearing as the tests hit the renamed fields"*
+- Once complete, show the **red X** on the workflow
+- Click into the run, show the failure summary: **13 out of 76 tests failed**
+- Show a specific error message: *"Expected `body.count` to be greater than 0, but received `undefined` — because the field was renamed to `totalCount`"*
 
-| Feature | What to Show |
-|---------|-------------|
-| **Automated generation** | Devin reads .NET source code and generates TypeScript Playwright tests |
-| **Mock server approach** | No live infrastructure needed — tests run anywhere |
-| **CI integration** | GitHub Actions triggers on every push/PR |
-| **Self-healing** | Devin can fix broken tests automatically |
-| **Multi-environment** | Same tests run against mock, SIT, QA, UAT, Prod |
-| **Traceability** | Every test maps back to source code endpoints |
-| **Rich reporting** | HTML reports with traces, screenshots, timing |
+### Step 3: Trigger Self-Healing via Devin (1 min)
+- Switch to the **Devin** tab
+- Run the **"Self-Heal Failing Tests"** Playbook with the branch name
+- Or type manually: *"The integration tests are failing on branch {branch_name} in eShop-demo. Analyze the failures and fix the tests."*
+
+### Step 4: Watch Devin Fix the Tests (2-3 min)
+- Devin will:
+  1. Clone/pull the repo and checkout the branch
+  2. Run the tests — sees 13 failures
+  3. Read each error message: `body.count is undefined`, `body.data is undefined`
+  4. Understand the pattern: `count` was renamed to `totalCount`, `data` was renamed to `items`
+  5. Update all 13 test assertions across 4 spec files
+  6. Add `// HEALED:` comments explaining each change
+  7. Run tests again — all 76 pass
+  8. Commit and push the fix
+
+### Step 5: Watch CI Re-Run and Pass (2-3 min)
+- Switch back to **GitHub Actions**
+- *"The push from Devin has triggered CI again automatically"*
+- Watch the workflow run — this time all 76 tests pass
+- Show the green checkmark on the PR
+
+### Step 6: Show the Healed Code (1 min)
+- Open the PR diff in GitHub
+- Show the healing commit — each changed line has a `// HEALED:` comment:
+  ```typescript
+  // HEALED: API renamed 'count' -> 'totalCount' and 'data' -> 'items'
+  expect(body.totalCount).toBeGreaterThan(0);
+  expect(body.items.length).toBeLessThanOrEqual(10);
+  ```
+- *"Devin didn't just blindly fix the assertions — it understood the API contract change and documented it"*
+
+### Key Talking Points for Demo 2
+- *"13 tests broke from a single API change — Devin fixed all 13 in under a minute"*
+- *"The fixes are documented with HEALED comments — full audit trail"*
+- *"No human intervention required — developer pushes a breaking change, Devin adapts the tests"*
+- *"This works for any type of API contract change: renamed fields, changed status codes, new required fields, modified response structures"*
+
+---
+
+## Pre-Prepared Breaking Changes (Ready to Use in Demo)
+
+If you want a quick demo without editing code live, these changes are pre-built in **PR #2**:
+
+| Change | Impact | Tests Affected |
+|--------|--------|----------------|
+| `count` -> `totalCount` in pagination responses | 6 tests fail on `body.count` being undefined | B01, B04, G01, G03, G16 |
+| `data` -> `items` in pagination responses | 12 tests fail on `body.data` being undefined | B01-B05, B08, B09, B12, G01, G03, G04, G16, E01 |
+| DELETE returns 200+body instead of 204 | 1 test fails on status code check | A10 |
+
+**Total: 13 unique test failures across 4 spec files.**
+
+---
+
+## Creating the Playbooks in Devin
+
+### How to Create a Playbook
+
+1. Go to **Devin Settings** > **Playbooks** (or `https://app.devin.ai/playbooks`)
+2. Click **"Create Playbook"**
+3. Enter the name (e.g., "Run Integration Tests")
+4. Paste the instructions from the relevant section above
+5. Save
+
+### How to Trigger a Playbook
+
+1. Open a new Devin session
+2. Click **"Run Playbook"** or type the playbook name
+3. Fill in any parameters (e.g., `{branch_name}`)
+4. Devin executes the instructions automatically
+
+---
+
+## Demo Timeline
+
+| Time | Action |
+|------|--------|
+| 0:00 | Introduction — show the repo, test suite, Allure dashboard |
+| 1:00 | **Demo 1 Start** — make a code change, create PR |
+| 2:00 | Show CI triggering automatically |
+| 4:00 | Show green CI, Allure report with 76/76 passed |
+| 5:00 | **Demo 2 Start** — introduce breaking API change |
+| 6:00 | Show CI failing with 13 test failures |
+| 7:00 | Trigger Devin self-healing Playbook |
+| 9:00 | Show Devin fixing tests, pushing, CI re-running |
+| 11:00 | Show green CI, healed code with HEALED comments |
+| 12:00 | Summary — key value props, Q&A |
+
+**Total demo time: ~12 minutes**
 
 ---
 
@@ -151,7 +255,7 @@ tests/
 │   ├── data/catalog-seed.json # 101 products from actual catalog
 │   └── package.json
 ├── playwright/
-│   ├── playwright.config.ts   # Auto-starts mock server, configurable BASE_URL
+│   ├── playwright.config.ts   # Auto-starts mock server, Allure reporter configured
 │   ├── helpers/test-data.ts   # Shared test utilities and factories
 │   ├── specs/
 │   │   ├── catalog/
@@ -169,7 +273,7 @@ tests/
 │   │       └── error-handling.spec.ts     # 16 tests (G01-G16)
 │   └── package.json
 .github/workflows/
-└── integration-tests.yml      # CI workflow (push/PR/manual trigger)
+└── integration-tests.yml      # CI: test + Allure report + GitHub Pages deploy
 ```
 
 ---
@@ -183,10 +287,16 @@ cd tests/playwright && npm install && npm test
 # Run with tracing
 npm run test:trace
 
-# Run against a live environment
-BASE_URL=https://your-sit-env.com npx playwright test
+# Run and generate Allure report
+npm run test:allure
 
-# View HTML report
+# Open Allure dashboard in browser
+npm run allure:serve
+
+# Run against a live environment
+BASE_URL=https://your-env.com npx playwright test
+
+# View Playwright HTML report
 npx playwright show-report
 
 # Trigger via GitHub Actions (manual)
