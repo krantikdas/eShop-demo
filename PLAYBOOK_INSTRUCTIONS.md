@@ -6,27 +6,50 @@ This document provides two Devin Playbooks and step-by-step demo scripts for pre
 
 ---
 
-## Prerequisites (Before the Demo)
+## Prerequisites — What to Do Before the Demo
 
-1. **GitHub repo:** `https://github.com/krantikdas/eShop-demo` with PR #1 merged to `main`
-2. **Devin session** with access to the repo (GitHub PAT saved as `GITHUB_PAT` secret)
-3. **Allure report** live at `https://krantikdas.github.io/eShop-demo/` (auto-published after merge)
-4. **Browser tabs open:**
-   - GitHub repo: `https://github.com/krantikdas/eShop-demo`
-   - GitHub Actions: `https://github.com/krantikdas/eShop-demo/actions`
-   - Allure report: `https://krantikdas.github.io/eShop-demo/`
-   - Devin session: `https://app.devin.ai`
+### Step P1: Merge PR #1 to `main` (One-Time Setup)
 
----
+This must be done once before any demo. It puts the test suite and CI workflow on the `main` branch.
 
-## Playbook 1: Run Integration Tests
+1. Open your browser and go to: `https://github.com/krantikdas/eShop-demo/pull/1`
+2. You'll see the PR page. Scroll down to the green **"Merge pull request"** button at the bottom
+3. Click **"Merge pull request"**
+4. Click **"Confirm merge"**
+5. You should see a purple "Merged" badge appear at the top of the PR
 
-**Purpose:** Demo 1 — Show a code change triggering automated regression tests.
+### Step P2: Verify GitHub Pages is Enabled
 
-### Devin Playbook Instructions
+After merging, the CI will run on `main` and deploy the Allure report. To verify GitHub Pages is active:
 
-Create this as a Devin Playbook (saved instruction set) with the name **"Run Integration Tests"**:
+1. Go to: `https://github.com/krantikdas/eShop-demo/settings/pages`
+   - To get there manually: go to the repo page → click the **"Settings"** tab (gear icon, far right of the top tabs) → scroll down the left sidebar and click **"Pages"**
+2. Under "Build and deployment", you should see **Source: GitHub Actions**
+3. Wait 3-5 minutes after the merge for CI to finish
+4. Open: `https://krantikdas.github.io/eShop-demo/`
+5. You should see the Allure test dashboard — this is your baseline report
 
+### Step P3: Open These Browser Tabs Before the Demo
+
+Open 4 tabs in your browser:
+
+| Tab | URL | What It Shows |
+|-----|-----|--------------|
+| 1. GitHub Repo | `https://github.com/krantikdas/eShop-demo` | The source code |
+| 2. GitHub Actions | `https://github.com/krantikdas/eShop-demo/actions` | CI workflow runs |
+| 3. Allure Report | `https://krantikdas.github.io/eShop-demo/` | Live test dashboard |
+| 4. Devin | `https://app.devin.ai` | The AI agent |
+
+### Step P4: Create the Playbooks in Devin (One-Time Setup)
+
+You need to create 2 Playbooks in Devin. Do this once before the demo:
+
+**Creating Playbook 1 — "Run Integration Tests":**
+1. Go to: `https://app.devin.ai/playbooks`
+   - Or from the Devin home screen: click your profile/settings icon → click **"Playbooks"**
+2. Click the **"Create Playbook"** button (usually top-right)
+3. In the **Name** field, type: `Run Integration Tests`
+4. In the **Instructions** field, paste this text:
 ```
 You are a Playwright integration testing agent for the eShop-demo .NET microservices repository.
 
@@ -46,17 +69,12 @@ You are a Playwright integration testing agent for the eShop-demo .NET microserv
    - Link to the GitHub Actions run (if triggered via CI)
    - Any recommendations
 ```
+5. Click **"Save"**
 
----
-
-## Playbook 2: Self-Heal Failing Tests
-
-**Purpose:** Demo 2 — Show Devin detecting test failures from a breaking API change and automatically fixing the tests.
-
-### Devin Playbook Instructions
-
-Create this as a Devin Playbook with the name **"Self-Heal Failing Tests"**:
-
+**Creating Playbook 2 — "Self-Heal Failing Tests":**
+1. Still on the Playbooks page, click **"Create Playbook"** again
+2. In the **Name** field, type: `Self-Heal Failing Tests`
+3. In the **Instructions** field, paste this text:
 ```
 You are a Playwright test healing agent for the eShop-demo repository.
 
@@ -76,127 +94,263 @@ You are a Playwright test healing agent for the eShop-demo repository.
    g. If tests still fail: report the remaining failures for manual review
 8. Summarize what was healed: number of tests fixed, what changed, which files were modified
 ```
+4. Click **"Save"**
+
+You now have both Playbooks ready. You can verify them by going back to the Playbooks list — you should see both entries.
 
 ---
 
-## Demo 1 — Step-by-Step Script: Automated Regression on Code Change
+## DEMO 1 — Automated Regression on Code Change
 
-**Narrative:** *"Watch what happens when a developer commits a code change — the full regression suite runs automatically."*
-
-### Step 1: Show the Starting Point (1 min)
-- Open the GitHub repo in browser
-- Show the `tests/playwright/specs/` folder — *"We have 76 automated integration tests covering 4 microservices"*
-- Show the Allure report at `https://krantikdas.github.io/eShop-demo/` — *"This is our current test dashboard — 100% passing"*
-
-### Step 2: Make a Code Change (1 min)
-- In Devin, say: *"Make a small documentation change to the README in eShop-demo and open a PR to main"*
-- Or manually: open any file in `src/` in GitHub, click Edit, add a comment like `// Performance optimization v2`, commit to a new branch, and create a PR
-
-### Step 3: Watch CI Trigger Automatically (2-3 min)
-- Switch to the **GitHub Actions** tab
-- *"Notice the 'Integration Tests (Playwright)' workflow has been triggered automatically by the PR"*
-- Click into the running workflow
-- Show the live logs — you'll see:
-  - `Install mock server dependencies`
-  - `Install Playwright test dependencies`
-  - `Run integration tests` — this shows test-by-test progress
-  - `Generate Allure report`
-  - Artifact uploads
-
-### Step 4: Show the Results (1 min)
-- Once complete, show the green checkmark on the workflow
-- Go back to the PR page — show the green CI status check: *"Integration Tests (Playwright) — All checks passed"*
-- Click into the workflow run, scroll to **Artifacts**, show:
-  - `playwright-html-report` — Playwright's built-in report
-  - `allure-report` — Rich visual dashboard
-  - `allure-results` — Raw data for trend analysis
-
-### Step 5: Show the Allure Report (1 min)
-- If this was a push to main (after merge): open `https://krantikdas.github.io/eShop-demo/`
-- If this was a PR: download the `allure-report` artifact, unzip, open `index.html`
-- Walk through:
-  - **Overview** — 76 tests, 100% pass rate, duration
-  - **Suites** — 7 test suites broken down by service
-  - **Graphs** — visual pass/fail distribution
-  - **Timeline** — execution timeline showing test ordering
-
-### Key Talking Points for Demo 1
-- *"Zero manual effort — the developer just pushes code and gets instant feedback"*
-- *"76 tests covering Catalog, Basket, Ordering, Webhooks, and cross-service flows"*
-- *"Full traceability — every test maps back to a specific API endpoint"*
-- *"Rich reporting — not just pass/fail, but traces, timing, and visual dashboards"*
+**What you're showing:** *A developer makes a code change, pushes it, and the full regression suite runs automatically with results visible in a rich dashboard.*
 
 ---
 
-## Demo 2 — Step-by-Step Script: Self-Healing on Breaking Change
+### Demo 1, Step 1: Show the Test Suite in GitHub (1 min)
 
-**Narrative:** *"Now watch what happens when a developer makes a breaking API change — Devin detects the failures and fixes the tests automatically."*
+**What you say:** *"Let me show you the test suite we have in this repository."*
 
-### Step 1: Introduce the Breaking Change (1 min)
-- In Devin or directly in GitHub, make a breaking change to the mock server. The pre-prepared change is:
-  - Open `tests/mock-server/server.js`
-  - On the catalog list endpoint, change the pagination response fields:
-    ```js
-    // BEFORE:
-    res.json({ pageIndex, pageSize, count: totalItems, data });
+1. Switch to your **GitHub Repo tab** (`https://github.com/krantikdas/eShop-demo`)
+2. You'll see the repo's file list on the main page. Click on the **`tests`** folder
+3. Click on the **`playwright`** folder
+4. Click on the **`specs`** folder
+5. You'll now see 7 subfolders:
+   ```
+   basket/
+   catalog/
+   edge-cases/
+   integration/
+   ordering/
+   webhooks/
+   ```
+6. **What you say:** *"We have 76 automated Playwright integration tests organized into 7 categories, covering all 4 microservices — Catalog, Basket, Ordering, and Webhooks."*
+7. Click into **`catalog/`** to show the spec files inside — you'll see `catalog-crud.spec.ts` and `catalog-query.spec.ts`
+8. Click on **`catalog-crud.spec.ts`** to show actual test code — scroll through briefly to show the test structure
+9. Click the browser **Back** button twice to return to the `specs/` folder
 
-    // AFTER:
-    res.json({ pageIndex, pageSize, totalCount: totalItems, items: data });
-    ```
-  - *"This simulates a backend developer renaming API response fields — a common real-world scenario"*
-- Commit and push to a new branch, open a PR
+### Demo 1, Step 2: Show the Allure Report Baseline (1 min)
 
-### Step 2: Watch CI Fail (2-3 min)
-- Switch to **GitHub Actions** tab
-- The workflow triggers automatically
-- *"Watch the test run — you'll see failures appearing as the tests hit the renamed fields"*
-- Once complete, show the **red X** on the workflow
-- Click into the run, show the failure summary: **13 out of 76 tests failed**
-- Show a specific error message: *"Expected `body.count` to be greater than 0, but received `undefined` — because the field was renamed to `totalCount`"*
+**What you say:** *"And here's our live test dashboard — this updates automatically after every test run."*
 
-### Step 3: Trigger Self-Healing via Devin (1 min)
-- Switch to the **Devin** tab
-- Run the **"Self-Heal Failing Tests"** Playbook with the branch name
-- Or type manually: *"The integration tests are failing on branch {branch_name} in eShop-demo. Analyze the failures and fix the tests."*
+1. Switch to your **Allure Report tab** (`https://krantikdas.github.io/eShop-demo/`)
+2. You'll see the Allure dashboard with:
+   - A large number **"76"** (total tests) at the top
+   - A green circle showing 100% pass rate
+   - Test suite breakdown on the left sidebar
+3. **What you say:** *"76 tests, 100% passing. This is our current baseline. Now let's see what happens when a developer makes a code change."*
 
-### Step 4: Watch Devin Fix the Tests (2-3 min)
-- Devin will:
-  1. Clone/pull the repo and checkout the branch
-  2. Run the tests — sees 13 failures
-  3. Read each error message: `body.count is undefined`, `body.data is undefined`
-  4. Understand the pattern: `count` was renamed to `totalCount`, `data` was renamed to `items`
-  5. Update all 13 test assertions across 4 spec files
-  6. Add `// HEALED:` comments explaining each change
-  7. Run tests again — all 76 pass
-  8. Commit and push the fix
+### Demo 1, Step 3: Make a Code Change in GitHub (1 min)
 
-### Step 5: Watch CI Re-Run and Pass (2-3 min)
-- Switch back to **GitHub Actions**
-- *"The push from Devin has triggered CI again automatically"*
-- Watch the workflow run — this time all 76 tests pass
-- Show the green checkmark on the PR
+**What you say:** *"Now I'll simulate a developer making a small code change."*
 
-### Step 6: Show the Healed Code (1 min)
-- Open the PR diff in GitHub
-- Show the healing commit — each changed line has a `// HEALED:` comment:
-  ```typescript
-  // HEALED: API renamed 'count' -> 'totalCount' and 'data' -> 'items'
-  expect(body.totalCount).toBeGreaterThan(0);
-  expect(body.items.length).toBeLessThanOrEqual(10);
-  ```
-- *"Devin didn't just blindly fix the assertions — it understood the API contract change and documented it"*
+**Option A — Do it via Devin (recommended for the demo):**
+1. Switch to your **Devin tab** (`https://app.devin.ai`)
+2. Type in the chat: *"Make a small comment change to src/Catalog.API/Program.cs in eShop-demo and open a PR to main"*
+3. Devin will edit the file, create a branch, push, and open a PR
+4. Move on to Step 4 while Devin works
 
-### Key Talking Points for Demo 2
-- *"13 tests broke from a single API change — Devin fixed all 13 in under a minute"*
-- *"The fixes are documented with HEALED comments — full audit trail"*
-- *"No human intervention required — developer pushes a breaking change, Devin adapts the tests"*
-- *"This works for any type of API contract change: renamed fields, changed status codes, new required fields, modified response structures"*
+**Option B — Do it manually in GitHub:**
+1. Switch to your **GitHub Repo tab**
+2. In the file list at the top, click on the **`src`** folder
+3. Click on **`Catalog.API`**
+4. Click on **`Program.cs`**
+5. You'll see the file contents. Click the **pencil icon** (top-right of the file content area, next to the trash icon) to edit
+6. Add a comment anywhere, e.g. on line 1 add: `// Performance optimization v2`
+7. Scroll down to the bottom of the page. You'll see a section called **"Commit changes"**
+8. Select **"Create a new branch for this commit and start a pull request"**
+9. In the branch name field, type something like: `demo/code-change`
+10. Click the green **"Propose changes"** button
+11. On the next screen (Open a pull request), click the green **"Create pull request"** button
+12. **What you say:** *"I've committed a code change and opened a Pull Request — just like a developer would in their normal workflow."*
+
+### Demo 1, Step 4: Watch CI Trigger Automatically (2-3 min)
+
+**What you say:** *"Now watch — the integration tests are triggered automatically by the Pull Request."*
+
+1. Switch to your **GitHub Actions tab** (`https://github.com/krantikdas/eShop-demo/actions`)
+   - To get here from any GitHub page: look at the **top tab bar** of the repo (Code, Issues, Pull requests, **Actions**, Projects, etc.) and click **"Actions"**
+2. You'll see a list of workflow runs. At the very top, there should be a **new run** with:
+   - A **yellow spinning circle** icon (meaning "in progress")
+   - The name of your commit message
+   - The workflow name: **"Integration Tests (Playwright)"**
+3. **Click on that running workflow** (click the commit message text)
+4. You'll see the workflow detail page. It shows a **job box** called **"Run Integration Tests"** with a yellow spinning icon
+5. **Click on "Run Integration Tests"** to see the live logs
+6. You'll see expandable steps on the left. The ones to point out:
+   - **"Install mock server dependencies"** — sets up the Express mock server
+   - **"Install Playwright test dependencies"** — installs Playwright and Allure
+   - **"Run integration tests"** — this is where the tests actually run
+7. Click on **"Run integration tests"** to expand the live log
+8. **What you say:** *"You can see each test running in real-time — Catalog CRUD tests, Basket tests, Ordering lifecycle, cross-service integration, and so on."*
+9. Wait for the run to complete (typically 2-3 minutes). The spinning icon will turn to a **green checkmark**
+
+### Demo 1, Step 5: Show the CI Results (1 min)
+
+**What you say:** *"All 76 tests passed. Let's look at the detailed results."*
+
+1. After the workflow completes, you'll see a green checkmark next to **"Run Integration Tests"**
+2. Scroll down the page — at the very bottom you'll see a section called **"Artifacts"**
+3. You'll see 3 downloadable items:
+   - **`allure-report`** — click to download (this is the visual dashboard)
+   - **`allure-results`** — raw test data
+   - **`playwright-html-report`** — Playwright's built-in report
+4. **What you say:** *"The CI automatically generates three types of reports as downloadable artifacts."*
+
+### Demo 1, Step 6: Show the PR with Green Check (1 min)
+
+**What you say:** *"Let's go back to the Pull Request to see the status."*
+
+1. Click the **"Pull requests"** tab at the top of the repo (or go to `https://github.com/krantikdas/eShop-demo/pulls`)
+2. Click on the PR you created in Step 3
+3. Scroll down to the **"Checks"** section (below the PR description)
+4. You'll see: **"Integration Tests (Playwright) — All checks have passed"** with a green checkmark
+5. **What you say:** *"The Pull Request now shows a green status check — the developer and reviewers can see at a glance that all integration tests pass."*
+
+### Demo 1, Step 7: Show the Allure Report (1 min)
+
+**What you say:** *"Now let's look at the rich visual test report."*
+
+**If viewing the live GitHub Pages version** (after merging to main):
+1. Switch to your **Allure Report tab** and refresh the page (`https://krantikdas.github.io/eShop-demo/`)
+2. The report should now show the latest run data
+
+**If viewing from the CI artifact** (during a PR, before merging):
+1. Go back to the workflow run page (GitHub Actions → click the completed run)
+2. Scroll to **Artifacts** at the bottom
+3. Click **`allure-report`** to download it — a `.zip` file will download
+4. Open your **Downloads** folder, find `allure-report.zip`, and **unzip** it (double-click on Mac, or right-click → Extract on Windows)
+5. Open the unzipped folder, find **`index.html`**, and **double-click** to open it in your browser
+
+6. The Allure dashboard shows:
+   - **Overview page** — total tests (76), pass rate (100%), duration
+   - Click **"Suites"** in the left sidebar — shows the 7 test categories (Catalog CRUD, Catalog Query, Basket, Orders, etc.)
+   - Click **"Graphs"** in the left sidebar — shows visual charts of test status
+   - Click **"Timeline"** in the left sidebar — shows when each test ran
+   - Click on any individual test name to see its details: steps, duration, assertions
+7. **What you say:** *"This gives us a complete visual breakdown — pass rates, timing, suite-by-suite analysis. Not just pass/fail, but rich actionable data."*
+
+### Demo 1 Summary
+
+**What you say:** *"So to summarise Demo 1: the developer pushed a code change, the integration tests ran automatically, all 76 passed, and we have a rich visual dashboard showing the results. Zero manual effort."*
+
+---
+
+## DEMO 2 — Self-Healing on Breaking Change
+
+**What you're showing:** *A developer makes a breaking API change, tests fail, and Devin automatically detects the failures, fixes the tests, and pushes the fix — all without human intervention.*
+
+---
+
+### Demo 2, Step 1: Introduce the Breaking Change in GitHub (2 min)
+
+**What you say:** *"Now I'm going to simulate something that happens all the time in real projects — a developer renames some API fields, which breaks the existing tests."*
+
+1. Switch to your **GitHub Repo tab** (`https://github.com/krantikdas/eShop-demo`)
+2. In the file list, click on **`tests`** folder
+3. Click on **`mock-server`** folder
+4. Click on **`server.js`** — this is the mock API server
+5. Click the **pencil icon** (top-right of the file content) to edit the file
+6. Use **Ctrl+F** (or Cmd+F on Mac) to open the find box. Search for: `count: totalItems, data`
+7. You'll find a line that looks like:
+   ```js
+   res.json({ pageIndex, pageSize, count: totalItems, data });
+   ```
+8. Change it to:
+   ```js
+   res.json({ pageIndex, pageSize, totalCount: totalItems, items: data });
+   ```
+   (Replace `count:` with `totalCount:` and `data` with `items: data`)
+9. Scroll down to the bottom of the page
+10. Select **"Create a new branch for this commit and start a pull request"**
+11. In the branch name field, type: `demo/breaking-change`
+12. Click the green **"Propose changes"** button
+13. On the next screen, click the green **"Create pull request"** button
+14. **What you say:** *"I've just renamed two API response fields — 'count' to 'totalCount' and 'data' to 'items'. This is a very common real-world scenario."*
+
+### Demo 2, Step 2: Watch CI Fail (2-3 min)
+
+**What you say:** *"Let's watch what happens to the tests."*
+
+1. Click the **"Actions"** tab at the top of the repo
+   - Or go to: `https://github.com/krantikdas/eShop-demo/actions`
+2. At the top of the list, you'll see a new workflow run with a **yellow spinning circle** (in progress)
+3. **Click on the running workflow** (click the commit message text)
+4. Click on the **"Run Integration Tests"** job box
+5. Wait for it to complete — the icon will change from yellow to a **red X** (failed)
+6. Click on the **"Run integration tests"** step to expand the log
+7. Scroll through — you'll see red **FAILED** markers. Look for error messages like:
+   ```
+   Expected: greater than 0
+   Received: undefined
+   ```
+8. **What you say:** *"13 out of 76 tests have failed. The tests expected a field called 'count' but it's now 'totalCount', so they get 'undefined'. This is exactly the kind of breakage that happens when backend teams refactor APIs."*
+9. To show the failure summary: scroll to the top of the log output — it will show something like: **"63 passed, 13 failed"**
+
+### Demo 2, Step 3: Trigger Self-Healing via Devin (1 min)
+
+**What you say:** *"Now instead of a developer manually fixing all 13 tests, watch what happens when we ask Devin to handle it."*
+
+1. Switch to your **Devin tab** (`https://app.devin.ai`)
+2. **Option A — Using the Playbook:**
+   - Click **"New Session"** (or use your current session)
+   - Type: `Run the "Self-Heal Failing Tests" playbook on branch demo/breaking-change`
+3. **Option B — Typing manually:**
+   - Type: `The integration tests are failing on branch demo/breaking-change in krantikdas/eShop-demo. Analyze the failures and fix the tests to match the new API contract.`
+4. Press **Enter** to send the message
+
+### Demo 2, Step 4: Watch Devin Fix the Tests (2-3 min)
+
+**What you say:** *"Watch Devin's terminal — it's analyzing each failure and understanding the pattern."*
+
+1. In the Devin session, you'll see Devin:
+   - Clone the repo and checkout the `demo/breaking-change` branch
+   - Run the Playwright tests — it will see 13 failures
+   - Read and analyze each error message
+   - Open the test files and update the assertions
+   - Add `// HEALED:` comments explaining each fix
+   - Run the tests again to verify all 76 pass
+   - Commit and push the fix
+2. Devin will report back with a summary like: *"Fixed 13 tests across 4 files. Changed `body.count` to `body.totalCount` and `body.data` to `body.items`."*
+3. **What you say:** *"Devin identified the pattern — two fields were renamed — and fixed all 13 tests automatically. It even added comments documenting what changed."*
+
+### Demo 2, Step 5: Watch CI Re-Run and Pass (2-3 min)
+
+**What you say:** *"Devin's push has triggered the CI again — let's see if the tests pass now."*
+
+1. Switch to your **GitHub Actions tab** (`https://github.com/krantikdas/eShop-demo/actions`)
+2. At the top of the list, you'll see a **new workflow run** triggered by Devin's push (yellow spinning circle)
+3. **Click on the running workflow**
+4. Click on the **"Run Integration Tests"** job box
+5. Wait for it to complete — this time the icon should turn to a **green checkmark**
+6. Click on **"Run integration tests"** to expand the log and verify: **"76 passed"**
+7. **What you say:** *"All 76 tests are passing again. The entire cycle — failure detection, analysis, fix, verification — happened automatically."*
+
+### Demo 2, Step 6: Show the Healed Code in the PR (1 min)
+
+**What you say:** *"Let me show you exactly what Devin changed."*
+
+1. Click the **"Pull requests"** tab at the top of the repo
+   - Or go to: `https://github.com/krantikdas/eShop-demo/pulls`
+2. Click on the PR for `demo/breaking-change`
+3. Click the **"Files changed"** tab (next to "Conversation" and "Commits" tabs, near the top)
+4. You'll see the diff view showing red (removed) and green (added) lines
+5. Look for the test file changes — you'll see lines like:
+   ```diff
+   - expect(body.count).toBeGreaterThan(0);
+   + // HEALED: API renamed 'count' -> 'totalCount'
+   + expect(body.totalCount).toBeGreaterThan(0);
+   ```
+6. **What you say:** *"Devin didn't just blindly fix the code — it understood the API contract change and added HEALED comments documenting exactly what changed and why. This gives you a full audit trail."*
+
+### Demo 2 Summary
+
+**What you say:** *"To summarise Demo 2: a developer renamed two API fields, 13 tests broke, Devin detected the failures, understood the pattern, fixed all 13 tests with documentation, and pushed the fix — all automatically. This is the self-healing capability."*
 
 ---
 
 ## Pre-Prepared Breaking Changes (Ready to Use in Demo)
 
-If you want a quick demo without editing code live, these changes are pre-built in **PR #2**:
+If you want a quick demo without editing code live, these changes are pre-built in **PR #2** (`https://github.com/krantikdas/eShop-demo/pull/2`):
 
 | Change | Impact | Tests Affected |
 |--------|--------|----------------|
@@ -208,41 +362,23 @@ If you want a quick demo without editing code live, these changes are pre-built 
 
 ---
 
-## Creating the Playbooks in Devin
-
-### How to Create a Playbook
-
-1. Go to **Devin Settings** > **Playbooks** (or `https://app.devin.ai/playbooks`)
-2. Click **"Create Playbook"**
-3. Enter the name (e.g., "Run Integration Tests")
-4. Paste the instructions from the relevant section above
-5. Save
-
-### How to Trigger a Playbook
-
-1. Open a new Devin session
-2. Click **"Run Playbook"** or type the playbook name
-3. Fill in any parameters (e.g., `{branch_name}`)
-4. Devin executes the instructions automatically
-
----
-
 ## Demo Timeline
 
-| Time | Action |
-|------|--------|
-| 0:00 | Introduction — show the repo, test suite, Allure dashboard |
-| 1:00 | **Demo 1 Start** — make a code change, create PR |
-| 2:00 | Show CI triggering automatically |
-| 4:00 | Show green CI, Allure report with 76/76 passed |
-| 5:00 | **Demo 2 Start** — introduce breaking API change |
-| 6:00 | Show CI failing with 13 test failures |
-| 7:00 | Trigger Devin self-healing Playbook |
-| 9:00 | Show Devin fixing tests, pushing, CI re-running |
-| 11:00 | Show green CI, healed code with HEALED comments |
-| 12:00 | Summary — key value props, Q&A |
+| Time | Action | Where to Look |
+|------|--------|---------------|
+| 0:00 | Introduction — show the repo and test suite | GitHub Repo tab |
+| 1:00 | Show the Allure baseline report | Allure Report tab |
+| 2:00 | **Demo 1** — make a code change, create PR | GitHub Repo tab |
+| 3:00 | Show CI triggering automatically | GitHub Actions tab |
+| 5:00 | Show green CI, download Allure report, walk through dashboard | GitHub Actions tab → downloaded report |
+| 6:00 | **Demo 2** — edit server.js to rename API fields, create PR | GitHub Repo tab |
+| 8:00 | Show CI failing with 13 test failures | GitHub Actions tab |
+| 9:00 | Trigger Devin self-healing Playbook | Devin tab |
+| 11:00 | Show Devin fixing tests, pushing, CI re-running | Devin tab → GitHub Actions tab |
+| 13:00 | Show green CI, walk through HEALED code in PR diff | GitHub Actions tab → PR "Files changed" tab |
+| 14:00 | Summary — key value props, Q&A | — |
 
-**Total demo time: ~12 minutes**
+**Total demo time: ~15 minutes**
 
 ---
 
