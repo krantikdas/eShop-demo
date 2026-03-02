@@ -21,6 +21,11 @@ on:
         required: false
         default: 'main'
         type: string
+      test_filter:
+        description: 'Filter tests by name (e.g. "checkout" or "browse"). Leave empty to run all tests.'
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -57,7 +62,7 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install chromium
     - name: Run Playwright tests
-      run: npx playwright test
+      run: npx playwright test ${{ github.event.inputs.test_filter && format('--grep "{0}"', github.event.inputs.test_filter) || '' }}
       env:
         ESHOP_USE_HTTP_ENDPOINTS: 1
         USERNAME1: bob
