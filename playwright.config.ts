@@ -48,6 +48,9 @@ export default defineConfig({
         '**/RemoveFromCartTest.spec.ts',
         '**/ViewOrderHistoryTest.spec.ts',
         '**/ViewProductDetailsTest.spec.ts',
+        '**/CartBadgeTest.spec.ts',
+        '**/CheckoutAddressTest.spec.ts',
+        '**/AdminUpdateProductTest.spec.ts',
       ],
       dependencies: ['setup'],
       use: {
