@@ -12,8 +12,8 @@ test.describe('Category G: Error Handling & Edge Cases', () => {
     const response = await request.get('/api/catalog/items?pageIndex=999');
     expect(response.status()).toBe(200);
     const body = await response.json();
-    expect(body.data).toHaveLength(0);
-    expect(body.count).toBeGreaterThan(0); // Count still reflects total
+    expect(body.items).toHaveLength(0); // HEALED: 'data' renamed to 'items' in API response
+    expect(body.totalCount).toBeGreaterThan(0); // HEALED: 'count' renamed to 'totalCount' in API response — Count still reflects total
   });
 
   test('G02 - Batch get with empty IDs returns empty array', async ({ request }) => {
@@ -183,6 +183,6 @@ test.describe('Category G: Error Handling & Edge Cases', () => {
     const response = await request.get('/api/catalog/items?pageSize=200');
     expect(response.status()).toBe(200);
     const body = await response.json();
-    expect(body.data.length).toBe(body.count); // All items on one page
+    expect(body.items.length).toBe(body.totalCount); // HEALED: 'data' renamed to 'items' and 'count' renamed to 'totalCount' in API response — All items on one page
   });
 });
