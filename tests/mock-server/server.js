@@ -94,7 +94,7 @@ app.get('/api/catalog/items', (req, res) => {
   const totalItems = filtered.length;
   const data = filtered.slice(pageSize * pageIndex, pageSize * pageIndex + pageSize);
 
-  res.json({ pageIndex, pageSize, count: totalItems, data });
+  res.json({ pageIndex, pageSize, totalCount: totalItems, items: data });
 });
 
 // GET /api/catalog/items/by?ids=1&ids=2 - Batch get
