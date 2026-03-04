@@ -11,10 +11,10 @@ test.describe('Category E: Cross-Service Integration', () => {
     const catalogResponse = await request.get('/api/catalog/items?pageSize=5');
     expect(catalogResponse.status()).toBe(200);
     const catalog = await catalogResponse.json();
-    expect(catalog.data.length).toBeGreaterThan(0);
+    expect(catalog.items.length).toBeGreaterThan(0); // HEALED: 'data' renamed to 'items' in API response
 
-    const item1 = catalog.data[0];
-    const item2 = catalog.data[1];
+    const item1 = catalog.items[0]; // HEALED: 'data' renamed to 'items' in API response
+    const item2 = catalog.items[1]; // HEALED: 'data' renamed to 'items' in API response
 
     // Step 2: Add items to basket
     const basketResponse = await request.post('/api/basket', {

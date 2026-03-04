@@ -12,8 +12,8 @@ test.describe('Category B: Catalog Query & Filtering', () => {
     const body = await response.json();
     expect(body.pageIndex).toBe(0);
     expect(body.pageSize).toBe(10);
-    expect(body.count).toBeGreaterThan(0);
-    expect(body.data.length).toBeLessThanOrEqual(10);
+    expect(body.totalCount).toBeGreaterThan(0); // HEALED: 'count' renamed to 'totalCount' in API response
+    expect(body.items.length).toBeLessThanOrEqual(10); // HEALED: 'data' renamed to 'items' in API response
   });
 
   test('B02 - List catalog items with custom page size', async ({ request }) => {
@@ -21,7 +21,7 @@ test.describe('Category B: Catalog Query & Filtering', () => {
     expect(response.status()).toBe(200);
     const body = await response.json();
     expect(body.pageSize).toBe(5);
-    expect(body.data.length).toBeLessThanOrEqual(5);
+    expect(body.items.length).toBeLessThanOrEqual(5); // HEALED: 'data' renamed to 'items' in API response
   });
 
   test('B03 - List catalog items page 2', async ({ request }) => {
@@ -29,21 +29,21 @@ test.describe('Category B: Catalog Query & Filtering', () => {
     expect(response.status()).toBe(200);
     const body = await response.json();
     expect(body.pageIndex).toBe(1);
-    expect(body.data.length).toBeGreaterThan(0);
+    expect(body.items.length).toBeGreaterThan(0); // HEALED: 'data' renamed to 'items' in API response
   });
 
   test('B04 - Total count remains consistent across pages', async ({ request }) => {
     const page0 = await (await request.get('/api/catalog/items?pageSize=5&pageIndex=0')).json();
     const page1 = await (await request.get('/api/catalog/items?pageSize=5&pageIndex=1')).json();
-    expect(page0.count).toBe(page1.count);
+    expect(page0.totalCount).toBe(page1.totalCount); // HEALED: 'count' renamed to 'totalCount' in API response
   });
 
   test('B05 - Filter items by name', async ({ request }) => {
     const response = await request.get('/api/catalog/items?name=Alpine');
     expect(response.status()).toBe(200);
     const body = await response.json();
-    expect(body.data.length).toBeGreaterThan(0);
-    for (const item of body.data) {
+    expect(body.items.length).toBeGreaterThan(0); // HEALED: 'data' renamed to 'items' in API response
+    for (const item of body.items) { // HEALED: 'data' renamed to 'items' in API response
       expect(item.name.toLowerCase()).toMatch(/^alpine/i);
     }
   });
