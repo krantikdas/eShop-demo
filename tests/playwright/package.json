@@ -1,0 +1,21 @@
+{
+  "name": "eshop-integration-tests",
+  "version": "1.0.0",
+  "description": "Playwright integration tests for eShop microservices",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:trace": "npx playwright test --trace on",
+    "test:headed": "npx playwright test --headed",
+    "report": "npx playwright show-report",
+    "allure:generate": "npx allure generate ./allure-results -o ./allure-report --clean",
+    "allure:open": "npx allure open ./allure-report",
+    "allure:serve": "npx allure serve ./allure-results",
+    "test:allure": "npx playwright test && npm run allure:generate",
+    "mock-server": "cd ../mock-server && node server.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "allure-commandline": "^2.37.0",
+    "allure-playwright": "^3.5.0"
+  }
+}

@@ -1,0 +1,125 @@
+name: Integration Tests (Playwright)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/integration-tests.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/integration-tests.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (mock, sit, qa, uat)'
+        required: false
+        default: 'mock'
+        type: choice
+        options:
+          - mock
+          - sit
+          - qa
+          - uat
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  integration-tests:
+    name: Run Integration Tests
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install mock server dependencies
+        working-directory: tests/mock-server
+        run: npm ci
+
+      - name: Install Playwright test dependencies
+        working-directory: tests/playwright
+        run: npm ci
+
+      - name: Run integration tests
+        working-directory: tests/playwright
+        run: npx playwright test --trace on
+        env:
+          CI: true
+
+      - name: Generate Allure report
+        working-directory: tests/playwright
+        if: always()
+        run: npx allure generate ./allure-results -o ./allure-report --clean
+
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-html-report
+          path: tests/playwright/playwright-report/
+          retention-days: 30
+
+      - name: Upload Allure report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report
+          path: tests/playwright/allure-report/
+          retention-days: 30
+
+      - name: Upload Allure results (for history)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results
+          path: tests/playwright/allure-results/
+          retention-days: 30
+
+      - name: Upload trace files
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: integration-test-traces
+          path: tests/playwright/test-results/
+          retention-days: 14
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        with:
+          path: tests/playwright/allure-report/
+
+  deploy-report:
+    name: Deploy Allure Report to GitHub Pages
+    needs: integration-tests
+    if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
