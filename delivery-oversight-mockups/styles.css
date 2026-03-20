@@ -4,14 +4,14 @@
    ============================================ */
 
 :root {
-  --primary: #1a1a2e;
-  --primary-light: #16213e;
-  --accent: #0f3460;
-  --accent-blue: #3b82f6;
+  --primary: #5c2483;
+  --primary-light: #7b3ba6;
+  --accent: #3d1759;
+  --accent-blue: #5c2483;
   --accent-green: #10b981;
   --accent-amber: #f59e0b;
   --accent-red: #ef4444;
-  --accent-purple: #8b5cf6;
+  --accent-purple: #c7017f;
   --bg: #f8fafc;
   --card-bg: #ffffff;
   --text: #1e293b;
@@ -60,12 +60,17 @@ body {
 .topbar-brand .logo-icon {
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  background: transparent;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
+}
+
+.topbar-brand .logo-icon svg {
+  width: 32px;
+  height: 32px;
 }
 
 .topbar-nav {
@@ -171,7 +176,7 @@ body {
   font-weight: 500;
   padding: 2px 8px;
   border-radius: 10px;
-  background: #eff6ff;
+  background: #f3e8ff;
   color: var(--accent-blue);
 }
 
@@ -324,8 +329,8 @@ body {
 
 /* AI insight panels */
 .ai-insight {
-  background: linear-gradient(135deg, #eff6ff, #f5f3ff);
-  border: 1px solid #dbeafe;
+  background: linear-gradient(135deg, #f3e8ff, #fce7f3);
+  border: 1px solid #e9d5ff;
   border-radius: var(--radius-sm);
   padding: 16px;
   margin-top: 16px;
@@ -338,7 +343,7 @@ body {
   margin-bottom: 8px;
   font-weight: 600;
   font-size: 13px;
-  color: var(--accent-blue);
+  color: var(--primary);
 }
 
 .ai-insight .ai-header .spark { font-size: 16px; }
@@ -365,8 +370,8 @@ body {
   font-weight: 500;
 }
 
-.tag-blue { background: #eff6ff; color: #1e40af; }
-.tag-purple { background: #f5f3ff; color: #6d28d9; }
+.tag-blue { background: #f3e8ff; color: #5c2483; }
+.tag-purple { background: #fce7f3; color: #c7017f; }
 .tag-green { background: #ecfdf5; color: #065f46; }
 .tag-amber { background: #fffbeb; color: #92400e; }
 .tag-red { background: #fef2f2; color: #991b1b; }
@@ -510,7 +515,7 @@ body {
   font-size: 12px;
   font-weight: 600;
   color: var(--accent-purple);
-  background: #f5f3ff;
+  background: #fce7f3;
   padding: 4px 10px;
   border-radius: 6px;
   margin-bottom: 12px;

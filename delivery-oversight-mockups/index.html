@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     .hero {
-      background: linear-gradient(135deg, var(--primary) 0%, #0f3460 50%, #1a1a4e 100%);
+      background: linear-gradient(135deg, var(--primary) 0%, #3d1759 50%, #2a0e40 100%);
       color: white;
       padding: 60px 40px;
       text-align: center;
@@ -19,8 +19,8 @@
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: radial-gradient(circle at 20% 50%, rgba(59,130,246,0.15) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 50%, rgba(139,92,246,0.15) 0%, transparent 50%);
+      background: radial-gradient(circle at 20% 50%, rgba(199,1,127,0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 50%, rgba(92,36,131,0.15) 0%, transparent 50%);
     }
     .hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
     .hero h1 {
@@ -29,7 +29,13 @@
       letter-spacing: -0.03em;
       margin-bottom: 12px;
     }
-    .hero h1 span { color: #93c5fd; }
+    .hero h1 span { color: #e9b0d3; }
+    .hero .dfs-logo-hero {
+      display: block;
+      margin: 0 auto 20px;
+      width: 80px;
+      height: auto;
+    }
     .hero .hero-sub {
       font-size: 16px;
       color: rgba(255,255,255,0.7);
@@ -133,8 +139,8 @@
       padding: 0 24px;
     }
     .data-source-card {
-      background: linear-gradient(135deg, #eff6ff, #f5f3ff);
-      border: 1px solid #dbeafe;
+      background: linear-gradient(135deg, #f3e8ff, #fce7f3);
+      border: 1px solid #e9d5ff;
       border-radius: 12px;
       padding: 20px 24px;
       display: flex;
@@ -161,6 +167,10 @@
   <!-- Hero -->
   <div class="hero">
     <div class="hero-content">
+      <svg class="dfs-logo-hero" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg">
+        <path d="M60 18 C60 18, 78 0, 90 0 C102 0, 112 12, 112 26 C112 46, 60 75, 60 75 C60 75, 8 46, 8 26 C8 12, 18 0, 30 0 C42 0, 60 18, 60 18Z" fill="#c7017f"/>
+        <text x="60" y="102" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="34" fill="white" letter-spacing="3">dfs</text>
+      </svg>
       <h1>delivery oversight: <span>agentic reporting suite</span></h1>
       <p class="hero-sub">Leveraging AI to minimise resource costs, drive speed &amp; create futureproofed tooling across delivery planning &amp; reporting.</p>
       <div class="hero-tag">DFS OMS R1 &mdash; Demo &bull; Powered by Jira Data &bull; 465 Items Tracked</div>
@@ -171,7 +181,7 @@
   <div class="agent-cards">
     <!-- Planner Agent -->
     <a href="planner-agent.html" class="agent-card">
-      <div class="ac-icon" style="background: linear-gradient(135deg, #eff6ff, #dbeafe);">&#128197;</div>
+      <div class="ac-icon" style="background: linear-gradient(135deg, #f3e8ff, #e9d5ff);">&#128197;</div>
       <div class="ac-category">Planning &amp; Dependency Management</div>
       <h3>Planner Agent</h3>
       <p>Generation of cross-stream project schedule and plan with base capacity and skills constraints optimised. Assists in sprint-level themes and recommended across-team priorities from backlog and technical architecture/design.</p>
@@ -186,7 +196,7 @@
 
     <!-- PlanMonitor -->
     <a href="plan-monitor.html" class="agent-card">
-      <div class="ac-icon" style="background: linear-gradient(135deg, #f5f3ff, #ede9fe);">&#128203;</div>
+      <div class="ac-icon" style="background: linear-gradient(135deg, #fce7f3, #fbcfe8);">&#128203;</div>
       <div class="ac-category">Planning &amp; Dependency Management</div>
       <h3>PlanMonitor</h3>
       <p>Auto-review of workstream plans, sprint monitoring, identify and track dependencies, recommend prioritised tasks and risks. Real-time burndown tracking with AI-powered deviation alerts.</p>
@@ -216,7 +226,7 @@
 
     <!-- RetroAssistant -->
     <a href="retro-assistant.html" class="agent-card">
-      <div class="ac-icon" style="background: linear-gradient(135deg, #fffbeb, #fef3c7);">&#128173;</div>
+      <div class="ac-icon" style="background: linear-gradient(135deg, #f3e8ff, #e9d5ff);">&#128173;</div>
       <div class="ac-category">Tracking &amp; Reporting</div>
       <h3>RetroAssistant</h3>
       <p>AI-assisted retro analysis, automated team metrics and capacity utilisation analysis. Theme clustering, sentiment analysis, and sprint-over-sprint action tracking.</p>
