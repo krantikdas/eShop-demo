@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProgressPack - Delivery Oversight</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .board-pack-header {
+      background: linear-gradient(135deg, var(--primary), #0f3460);
+      color: white;
+      padding: 24px 28px;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .board-pack-header h2 { font-size: 20px; margin-bottom: 4px; }
+    .board-pack-header .bp-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 13px;
+      opacity: 0.8;
+      margin-top: 8px;
+    }
+    .narrative-block {
+      background: #fafbfc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+    }
+    .narrative-block:last-child { margin-bottom: 0; }
+    .narrative-block h4 {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .narrative-block p {
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.6;
+    }
+    .raid-table th { font-size: 10px; }
+    .raid-table td { font-size: 12px; }
+    .raid-type {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .raid-type.risk { background: #fef2f2; color: #991b1b; }
+    .raid-type.action { background: #eff6ff; color: #1e40af; }
+    .raid-type.issue { background: #fffbeb; color: #92400e; }
+    .raid-type.dependency { background: #f5f3ff; color: #6d28d9; }
+    .velocity-bar-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+    .velocity-bar-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 140px;
+      gap: 2px;
+    }
+    .v-bar {
+      width: 32px;
+      border-radius: 3px 3px 0 0;
+      min-height: 2px;
+    }
+    .quality-metric {
+      text-align: center;
+      padding: 16px;
+    }
+    .quality-metric .q-value {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .quality-metric .q-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .quality-metric .q-trend {
+      font-size: 11px;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+    .exec-summary-row {
+      display: grid;
+      grid-template-columns: 180px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .exec-summary-row:last-child { border-bottom: none; }
+    .exec-summary-row:hover { background: #fafbfc; }
+    .exec-label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .exec-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="logo-icon">AI</div>
+      <span>Delivery Oversight</span>
+    </div>
+    <div class="topbar-nav">
+      <a href="planner-agent.html">Planner Agent</a>
+      <a href="plan-monitor.html">PlanMonitor</a>
+      <a href="progress-pack.html" class="active">ProgressPack</a>
+      <a href="retro-assistant.html">RetroAssistant</a>
+    </div>
+    <div class="topbar-meta">
+      <div class="agent-badge">
+        <div class="pulse"></div>
+        ProgressPack Generated
+      </div>
+      <span>DFS OMS R1</span>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <div class="page-header">
+      <div class="agent-label">
+        <span>&#9670;</span> ProgressPack
+      </div>
+      <h1>Board Pack &mdash; Week of 17 Mar 2026</h1>
+      <p class="subtitle">Auto-generated from sprint data, RAID logs, velocity metrics &amp; quality dashboards | Narrative summaries with RAG status</p>
+    </div>
+
+    <!-- Board Pack Banner -->
+    <div class="section">
+      <div class="card" style="overflow: visible;">
+        <div class="board-pack-header">
+          <h2>DFS OMS R1 &mdash; Fortnightly Board Pack</h2>
+          <div class="bp-meta">
+            <span>Reporting Period: 10 Mar &ndash; 20 Mar 2026</span>
+            <span>&bull;</span>
+            <span>Sprint 2 (Active) &mdash; Day 11 of 14</span>
+            <span>&bull;</span>
+            <span>Generated: 20 Mar 2026 19:00 UTC</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Executive RAG Summary -->
+          <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Executive RAG Summary</h3>
+          <div class="exec-summary-row">
+            <div class="exec-label">Overall Delivery</div>
+            <div class="exec-desc">Sprint 2 at 39% completion on day 11. Carrying risk from MTO SoDelCo complexity and OMS API dependency.</div>
+            <span class="rag-badge rag-amber"><span class="rag-dot"></span> Amber</span>
+          </div>
+          <div class="exec-summary-row">
+            <div class="exec-label">Customer Info Stream</div>
+            <div class="exec-desc">Sprint 1 epics fully complete. Sprint 2 email/phone/marketing amendments progressing well.</div>
+            <span class="rag-badge rag-green"><span class="rag-dot"></span> Green</span>
+          </div>
+          <div class="exec-summary-row">
+            <div class="exec-label">Delivery Address Stream</div>
+            <div class="exec-desc">MTO SoDelCo in progress but behind. Downstream 3PL epics blocked on OMS API v2.</div>
+            <span class="rag-badge rag-red"><span class="rag-dot"></span> Red</span>
+          </div>
+          <div class="exec-summary-row">
+            <div class="exec-label">Quality &amp; Testing</div>
+            <div class="exec-desc">26 tests completed in Sprint 1 with 0 defects. Sprint 2 test execution on track.</div>
+            <span class="rag-badge rag-green"><span class="rag-dot"></span> Green</span>
+          </div>
+          <div class="exec-summary-row">
+            <div class="exec-label">Team &amp; Capacity</div>
+            <div class="exec-desc">Dev Team Alpha at 92% utilisation. QA capacity will become bottleneck from Sprint 3.</div>
+            <span class="rag-badge rag-amber"><span class="rag-dot"></span> Amber</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Narrative Summaries -->
+    <div class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2><span>&#128221;</span> AI-Generated Narrative Summary</h2>
+          <span class="card-badge">Auto-generated</span>
+        </div>
+        <div class="card-body">
+          <div class="narrative-block">
+            <h4><span class="rag-badge rag-green" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span></span> Sprint 1 Retrospective</h4>
+            <p>Sprint 1 was completed successfully with all 26 items delivered (12 stories, 14 tests). The Customer Info Amendments workstream for Title, Name, and Billing Address is now <strong>fully complete</strong>. The team achieved a velocity of 26 points against a commitment of 26 &mdash; representing 100% commitment delivery. No defects were raised during sprint review. The patterns established for Customer Info will be leveraged in Sprint 2's Email, Phone, and Marketing Preference flows.</p>
+          </div>
+          <div class="narrative-block">
+            <h4><span class="rag-badge rag-amber" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span></span> Sprint 2 Mid-Sprint Update</h4>
+            <p>Sprint 2 is currently at <strong>39% completion (15/38 items)</strong> with 8 items in progress. The sprint is tracking 15% behind the ideal burndown. Customer Info items (Email, Phone, Marketing) are progressing well, but the MTO SoDelCo delivery address stories are proving more complex than estimated. The team identified that delivery routing logic requires additional integration touchpoints not captured in the original estimates. A <strong>mid-sprint scope review</strong> is recommended to determine if 3-5 lower-priority MTO tests should be deferred to Sprint 3.</p>
+          </div>
+          <div class="narrative-block">
+            <h4><span class="rag-badge rag-red" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span></span> Key Escalation: OMS API v2 Dependency</h4>
+            <p>The Delivery Address stream for 3PL Home DSV (Epic 7, DORD-10) is <strong>blocked</strong> pending the deployment of OMS API v2. This dependency gates three downstream epics (3PL DHD, DHD Direct, IMW) representing approximately 174 stories and tests. The platform team has not yet confirmed a deployment date. <strong>This is the single largest risk to overall delivery timeline.</strong> If unresolved by Sprint 4 start (Apr 7), the project completion forecast will move from Sprint 8 to Sprint 10.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Velocity + Quality Row -->
+    <div class="section">
+      <div class="grid-2">
+        <!-- Velocity Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h2><span>&#128640;</span> Velocity Metrics</h2>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background: var(--accent-green)"></div> Completed</div>
+              <div class="legend-item"><div class="legend-dot" style="background: var(--accent-blue)"></div> In Progress</div>
+              <div class="legend-item"><div class="legend-dot" style="background: #e2e8f0"></div> Remaining</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="display: flex; align-items: flex-end; gap: 16px; justify-content: space-around; padding: 0 16px;">
+              <!-- Sprint 1 -->
+              <div class="velocity-bar-group">
+                <div class="velocity-bar-stack">
+                  <div class="v-bar" style="height: 130px; background: var(--accent-green);"></div>
+                </div>
+                <div style="font-size: 12px; font-weight: 600;">26</div>
+                <div style="font-size: 10px; color: var(--text-secondary);">Sprint 1</div>
+                <div style="font-size: 10px; color: var(--accent-green); font-weight: 500;">100%</div>
+              </div>
+              <!-- Sprint 2 (in progress) -->
+              <div class="velocity-bar-group">
+                <div class="velocity-bar-stack">
+                  <div class="v-bar" style="height: 18px; background: #e2e8f0;"></div>
+                  <div class="v-bar" style="height: 30px; background: var(--accent-blue);"></div>
+                  <div class="v-bar" style="height: 52px; background: var(--accent-green);"></div>
+                </div>
+                <div style="font-size: 12px; font-weight: 600;">15 <span style="color: var(--text-secondary); font-weight: 400;">/ 38</span></div>
+                <div style="font-size: 10px; color: var(--text-secondary);">Sprint 2</div>
+                <div style="font-size: 10px; color: var(--accent-amber); font-weight: 500;">39%</div>
+              </div>
+              <!-- Sprint 3 (planned) -->
+              <div class="velocity-bar-group">
+                <div class="velocity-bar-stack">
+                  <div class="v-bar" style="height: 80px; background: #e2e8f0;"></div>
+                </div>
+                <div style="font-size: 12px; font-weight: 600;">0 <span style="color: var(--text-secondary); font-weight: 400;">/ 22</span></div>
+                <div style="font-size: 10px; color: var(--text-secondary);">Sprint 3</div>
+                <div style="font-size: 10px; color: var(--text-secondary); font-weight: 500;">Planned</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+              <div>
+                <span style="color: var(--text-secondary);">Avg Velocity:</span>
+                <strong>26 pts/sprint</strong>
+              </div>
+              <div>
+                <span style="color: var(--text-secondary);">Projected S2:</span>
+                <strong style="color: var(--accent-amber);">~30 pts</strong>
+                <span style="font-size: 10px; color: var(--text-secondary);">(8 carryover)</span>
+              </div>
+              <div>
+                <span style="color: var(--text-secondary);">Commitment:</span>
+                <strong>38 pts</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality Dashboard -->
+        <div class="card">
+          <div class="card-header">
+            <h2><span>&#128170;</span> Quality Dashboard</h2>
+          </div>
+          <div class="card-body">
+            <div class="grid-3" style="gap: 0; text-align: center; margin-bottom: 16px;">
+              <div class="quality-metric" style="border-right: 1px solid var(--border);">
+                <div class="q-value" style="color: var(--accent-green);">0</div>
+                <div class="q-label">Open Defects</div>
+                <div class="q-trend" style="color: var(--accent-green);">Maintained from S1</div>
+              </div>
+              <div class="quality-metric" style="border-right: 1px solid var(--border);">
+                <div class="q-value">100%</div>
+                <div class="q-label">Test Pass Rate</div>
+                <div class="q-trend" style="color: var(--accent-green);">26/26 in Sprint 1</div>
+              </div>
+              <div class="quality-metric">
+                <div class="q-value" style="color: var(--accent-blue);">40</div>
+                <div class="q-label">Tests Executed (Total)</div>
+                <div class="q-trend neutral">of 257 total planned</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">Test Coverage by Stream</h4>
+            <div style="margin-bottom: 8px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                <span>Customer Info Amendments</span>
+                <span style="font-weight: 600;">14/37 (38%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="fill green" style="width: 38%;"></div>
+              </div>
+            </div>
+            <div style="margin-bottom: 8px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                <span>Delivery Address &mdash; SoDelCo</span>
+                <span style="font-weight: 600;">7/90 (8%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="fill blue" style="width: 8%;"></div>
+              </div>
+            </div>
+            <div style="margin-bottom: 8px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                <span>Delivery Address &mdash; 3PL &amp; Direct</span>
+                <span style="font-weight: 600;">0/128 (0%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="fill" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                <span>Cross-cutting (ALL)</span>
+                <span style="font-weight: 600;">0/2 (0%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="fill" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RAID Log -->
+    <div class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2><span>&#128209;</span> RAID Log</h2>
+          <span class="card-badge">Auto-maintained</span>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <table class="data-table raid-table">
+            <thead>
+              <tr>
+                <th style="width: 40px;">#</th>
+                <th style="width: 90px;">Type</th>
+                <th>Description</th>
+                <th style="width: 100px;">Status</th>
+                <th style="width: 90px;">Priority</th>
+                <th style="width: 120px;">Owner</th>
+                <th style="width: 90px;">Due</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>R-01</td>
+                <td><span class="raid-type risk">RISK</span></td>
+                <td>OMS API v2 deployment date TBC &mdash; blocks 3PL delivery address epics</td>
+                <td><span class="status-pill status-blocked">Open</span></td>
+                <td><span class="tag tag-red">Critical</span></td>
+                <td>Delivery Lead</td>
+                <td>Mar 24</td>
+              </tr>
+              <tr>
+                <td>R-02</td>
+                <td><span class="raid-type risk">RISK</span></td>
+                <td>QA capacity insufficient for Sprint 3+ test volume (257 total tests)</td>
+                <td><span class="status-pill status-progress">Mitigating</span></td>
+                <td><span class="tag tag-amber">High</span></td>
+                <td>Delivery Mgr</td>
+                <td>Mar 21</td>
+              </tr>
+              <tr>
+                <td>A-01</td>
+                <td><span class="raid-type action">ACTION</span></td>
+                <td>Escalate OMS API v2 timeline to platform team lead</td>
+                <td><span class="status-pill status-progress">In Progress</span></td>
+                <td><span class="tag tag-red">Critical</span></td>
+                <td>Delivery Lead</td>
+                <td>Mar 21</td>
+              </tr>
+              <tr>
+                <td>A-02</td>
+                <td><span class="raid-type action">ACTION</span></td>
+                <td>Cross-skill Beta team member on Fluent API to reduce Alpha dependency</td>
+                <td><span class="status-pill status-todo">To Do</span></td>
+                <td><span class="tag tag-amber">High</span></td>
+                <td>Tech Lead</td>
+                <td>Mar 28</td>
+              </tr>
+              <tr>
+                <td>A-03</td>
+                <td><span class="raid-type action">ACTION</span></td>
+                <td>Refine 12 unestimated stories in Epic 5 (Stock Code SoDelCo) before Sprint 3</td>
+                <td><span class="status-pill status-todo">To Do</span></td>
+                <td><span class="tag tag-blue">Medium</span></td>
+                <td>BA Team</td>
+                <td>Mar 21</td>
+              </tr>
+              <tr>
+                <td>I-01</td>
+                <td><span class="raid-type issue">ISSUE</span></td>
+                <td>MTO SoDelCo stories taking 40% longer than estimated due to routing complexity</td>
+                <td><span class="status-pill status-progress">Investigating</span></td>
+                <td><span class="tag tag-amber">High</span></td>
+                <td>Scrum Master</td>
+                <td>Mar 22</td>
+              </tr>
+              <tr>
+                <td>D-01</td>
+                <td><span class="raid-type dependency">DEP</span></td>
+                <td>OMS API v2 required for DORD-10, DORD-11, DORD-12, DORD-13</td>
+                <td><span class="status-pill status-blocked">Blocked</span></td>
+                <td><span class="tag tag-red">Critical</span></td>
+                <td>Platform Team</td>
+                <td>TBC</td>
+              </tr>
+              <tr>
+                <td>D-02</td>
+                <td><span class="raid-type dependency">DEP</span></td>
+                <td>MTO SoDelCo (DORD-7) must complete before Stock Code SoDelCo (DORD-8) begins</td>
+                <td><span class="status-pill status-progress">On Track</span></td>
+                <td><span class="tag tag-blue">Medium</span></td>
+                <td>Dev Team</td>
+                <td>Sprint 2 end</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding: 0 20px 20px;">
+          <div class="ai-insight">
+            <div class="ai-header">
+              <span class="spark">&#10024;</span> ProgressPack Summary
+            </div>
+            <p>This board pack was <strong>auto-generated</strong> from live Jira sprint data, enriched with AI analysis of velocity trends, dependency chains, and capacity constraints. Key message for stakeholders: <strong>Customer Info stream is on track, but the Delivery Address stream requires immediate attention on the OMS API dependency to prevent a 2-sprint delay.</strong> Recommend scheduling a dependency review with the platform team within the next 48 hours.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

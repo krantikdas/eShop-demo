@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RetroAssistant - Delivery Oversight</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .retro-column {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .retro-column-header {
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .retro-column-header .count {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.3);
+    }
+    .retro-col-green .retro-column-header { background: #ecfdf5; color: #065f46; }
+    .retro-col-amber .retro-column-header { background: #fffbeb; color: #92400e; }
+    .retro-col-red .retro-column-header { background: #fef2f2; color: #991b1b; }
+    .retro-col-blue .retro-column-header { background: #eff6ff; color: #1e40af; }
+    .retro-item {
+      padding: 10px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 12px;
+      line-height: 1.5;
+      display: flex;
+      gap: 8px;
+    }
+    .retro-item:last-child { border-bottom: none; }
+    .retro-item .retro-icon { flex-shrink: 0; font-size: 14px; }
+    .retro-item .retro-votes {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+    .team-metric-card {
+      text-align: center;
+      padding: 20px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .team-metric-card .tm-value {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    .team-metric-card .tm-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .team-metric-card .tm-sub {
+      font-size: 11px;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+    .capacity-heatmap {
+      display: grid;
+      grid-template-columns: 120px repeat(3, 1fr);
+      gap: 2px;
+      font-size: 11px;
+    }
+    .heatmap-header {
+      font-weight: 600;
+      padding: 8px;
+      text-align: center;
+      background: #f8fafc;
+      color: var(--text-secondary);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .heatmap-label {
+      padding: 8px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+    }
+    .heatmap-cell {
+      padding: 8px;
+      text-align: center;
+      font-weight: 600;
+      border-radius: 4px;
+    }
+    .heatmap-cell.low { background: #ecfdf5; color: #065f46; }
+    .heatmap-cell.mid { background: #fffbeb; color: #92400e; }
+    .heatmap-cell.high { background: #fef2f2; color: #991b1b; }
+    .heatmap-cell.optimal { background: #eff6ff; color: #1e40af; }
+    .sentiment-bar {
+      display: flex;
+      height: 32px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    .sentiment-segment {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+    }
+    .action-item-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .action-item-row:last-child { border-bottom: none; }
+    .action-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px;
+    }
+    .action-checkbox.checked {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: white;
+    }
+    .action-content { flex: 1; }
+    .action-title { font-size: 13px; font-weight: 500; }
+    .action-meta { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+    .theme-bubble {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      margin: 4px;
+      border: 1px solid;
+    }
+    .theme-bubble.positive { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+    .theme-bubble.negative { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .theme-bubble.neutral { background: #f1f5f9; border-color: #e2e8f0; color: #475569; }
+    .theme-bubble .bubble-count {
+      font-size: 10px;
+      font-weight: 700;
+      background: rgba(0,0,0,0.08);
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="logo-icon">AI</div>
+      <span>Delivery Oversight</span>
+    </div>
+    <div class="topbar-nav">
+      <a href="planner-agent.html">Planner Agent</a>
+      <a href="plan-monitor.html">PlanMonitor</a>
+      <a href="progress-pack.html">ProgressPack</a>
+      <a href="retro-assistant.html" class="active">RetroAssistant</a>
+    </div>
+    <div class="topbar-meta">
+      <div class="agent-badge">
+        <div class="pulse"></div>
+        RetroAssistant Active
+      </div>
+      <span>DFS OMS R1</span>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <div class="page-header">
+      <div class="agent-label">
+        <span>&#9670;</span> RetroAssistant
+      </div>
+      <h1>Sprint 1 Retrospective Analysis</h1>
+      <p class="subtitle">AI-assisted retro analysis | Automated team metrics | Capacity utilisation analysis</p>
+    </div>
+
+    <!-- Sprint Summary KPIs -->
+    <div class="section">
+      <div class="grid-4">
+        <div class="team-metric-card">
+          <div class="tm-value" style="color: var(--accent-green);">100%</div>
+          <div class="tm-label">Sprint Commitment Met</div>
+          <div class="tm-sub" style="color: var(--accent-green);">26/26 items delivered</div>
+        </div>
+        <div class="team-metric-card">
+          <div class="tm-value">26</div>
+          <div class="tm-label">Velocity (Story Points)</div>
+          <div class="tm-sub neutral" style="color: var(--text-secondary);">Baseline established</div>
+        </div>
+        <div class="team-metric-card">
+          <div class="tm-value" style="color: var(--accent-green);">0</div>
+          <div class="tm-label">Defects Found</div>
+          <div class="tm-sub" style="color: var(--accent-green);">Zero defect sprint</div>
+        </div>
+        <div class="team-metric-card">
+          <div class="tm-value">4.2</div>
+          <div class="tm-label">Team Happiness (1-5)</div>
+          <div class="tm-sub" style="color: var(--accent-green);">Above benchmark (3.8)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Retro Board -->
+    <div class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2><span>&#128173;</span> AI-Analysed Retro Board</h2>
+          <span class="card-badge">Themes auto-clustered</span>
+        </div>
+        <div class="card-body">
+          <!-- Sentiment Overview -->
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px;">Team Sentiment Distribution</div>
+            <div class="sentiment-bar">
+              <div class="sentiment-segment" style="width: 55%; background: var(--accent-green);">55% Positive</div>
+              <div class="sentiment-segment" style="width: 30%; background: var(--accent-amber);">30% Neutral</div>
+              <div class="sentiment-segment" style="width: 15%; background: var(--accent-red);">15% Concern</div>
+            </div>
+          </div>
+
+          <!-- Theme Bubbles -->
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px;">Identified Themes (auto-clustered from retro items)</div>
+            <div>
+              <span class="theme-bubble positive">Clear acceptance criteria <span class="bubble-count">5</span></span>
+              <span class="theme-bubble positive">Good team collaboration <span class="bubble-count">4</span></span>
+              <span class="theme-bubble positive">Strong BA support <span class="bubble-count">3</span></span>
+              <span class="theme-bubble negative">Estimation accuracy <span class="bubble-count">3</span></span>
+              <span class="theme-bubble negative">Environment availability <span class="bubble-count">2</span></span>
+              <span class="theme-bubble neutral">Sprint scope management <span class="bubble-count">2</span></span>
+              <span class="theme-bubble neutral">Cross-team communication <span class="bubble-count">2</span></span>
+            </div>
+          </div>
+
+          <!-- Retro Columns -->
+          <div class="grid-4" style="gap: 12px;">
+            <!-- What went well -->
+            <div class="retro-column retro-col-green">
+              <div class="retro-column-header">
+                What Went Well
+                <span class="count">6</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128994;</span>
+                <span>Acceptance criteria for Customer Info stories were very clear - minimal rework needed</span>
+                <span class="retro-votes">&#9650; 5</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128994;</span>
+                <span>Strong collaboration between Dev Alpha and QA team - real-time defect resolution</span>
+                <span class="retro-votes">&#9650; 4</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128994;</span>
+                <span>BA team provided excellent support during implementation - quick clarifications</span>
+                <span class="retro-votes">&#9650; 3</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128994;</span>
+                <span>Zero defect sprint - all tests passed first time. Great quality focus</span>
+                <span class="retro-votes">&#9650; 4</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128994;</span>
+                <span>Daily standups kept everyone aligned - minimal blockers</span>
+                <span class="retro-votes">&#9650; 2</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128994;</span>
+                <span>Sprint planning was well-structured with clear priorities from PO</span>
+                <span class="retro-votes">&#9650; 3</span>
+              </div>
+            </div>
+
+            <!-- What could improve -->
+            <div class="retro-column retro-col-amber">
+              <div class="retro-column-header">
+                Could Improve
+                <span class="count">5</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128992;</span>
+                <span>Delivery address stories (coming next) may be underestimated - more complex than Customer Info</span>
+                <span class="retro-votes">&#9650; 4</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128992;</span>
+                <span>Test environment was down for 4 hours on day 8 - delayed QA execution</span>
+                <span class="retro-votes">&#9650; 3</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128992;</span>
+                <span>Cross-team dependency on OMS API not surfaced early enough in planning</span>
+                <span class="retro-votes">&#9650; 3</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128992;</span>
+                <span>Sprint scope could have been slightly larger - team had capacity headroom</span>
+                <span class="retro-votes">&#9650; 2</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128992;</span>
+                <span>Need better documentation of integration patterns for onboarding new team members</span>
+                <span class="retro-votes">&#9650; 2</span>
+              </div>
+            </div>
+
+            <!-- Concerns -->
+            <div class="retro-column retro-col-red">
+              <div class="retro-column-header">
+                Concerns
+                <span class="count">3</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128308;</span>
+                <span>OMS API v2 blocker could significantly delay 3PL work - no confirmed date yet</span>
+                <span class="retro-votes">&#9650; 5</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128308;</span>
+                <span>Dev Team Alpha at 92% utilisation is unsustainable - risk of burnout</span>
+                <span class="retro-votes">&#9650; 3</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128308;</span>
+                <span>257 tests remaining with limited QA capacity - will become bottleneck</span>
+                <span class="retro-votes">&#9650; 3</span>
+              </div>
+            </div>
+
+            <!-- Action Items -->
+            <div class="retro-column retro-col-blue">
+              <div class="retro-column-header">
+                Actions
+                <span class="count">5</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128309;</span>
+                <span>Schedule spike for delivery address complexity assessment before Sprint 2 planning</span>
+                <span class="retro-votes">Owner: TL</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128309;</span>
+                <span>Set up monitoring alerts for test environment uptime</span>
+                <span class="retro-votes">Owner: DevOps</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128309;</span>
+                <span>Create dependency tracking process for cross-team blockers</span>
+                <span class="retro-votes">Owner: SM</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128309;</span>
+                <span>Document Fluent API integration patterns in team wiki</span>
+                <span class="retro-votes">Owner: Dev</span>
+              </div>
+              <div class="retro-item">
+                <span class="retro-icon">&#128309;</span>
+                <span>Explore automated regression testing to scale QA capacity</span>
+                <span class="retro-votes">Owner: QA Lead</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Metrics + Capacity -->
+    <div class="section">
+      <div class="grid-2">
+        <!-- Automated Team Metrics -->
+        <div class="card">
+          <div class="card-header">
+            <h2><span>&#128202;</span> Automated Team Metrics</h2>
+            <span class="card-badge">Sprint 1</span>
+          </div>
+          <div class="card-body">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Sprint 1</th>
+                  <th>Target</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 500;">Velocity</td>
+                  <td><strong>26 pts</strong></td>
+                  <td>24 pts</td>
+                  <td><span class="rag-badge rag-green" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Above</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">Commitment Reliability</td>
+                  <td><strong>100%</strong></td>
+                  <td>85%</td>
+                  <td><span class="rag-badge rag-green" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Above</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">Avg Cycle Time</td>
+                  <td><strong>2.1 days</strong></td>
+                  <td>3 days</td>
+                  <td><span class="rag-badge rag-green" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Good</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">Defect Escape Rate</td>
+                  <td><strong>0%</strong></td>
+                  <td>&lt;5%</td>
+                  <td><span class="rag-badge rag-green" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Excellent</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">Scope Change</td>
+                  <td><strong>0 items</strong></td>
+                  <td>&lt;3 items</td>
+                  <td><span class="rag-badge rag-green" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Stable</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">Blocked Time</td>
+                  <td><strong>4 hrs</strong></td>
+                  <td>&lt;8 hrs</td>
+                  <td><span class="rag-badge rag-amber" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Monitor</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">Team Happiness</td>
+                  <td><strong>4.2 / 5</strong></td>
+                  <td>&gt;3.5</td>
+                  <td><span class="rag-badge rag-green" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Good</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="ai-insight" style="margin-top: 12px;">
+              <div class="ai-header">
+                <span class="spark">&#10024;</span> Metrics Insight
+              </div>
+              <p>Sprint 1 metrics are <strong>above target across all dimensions</strong>. This was a strong opening sprint. However, the team completed Customer Info stories which are lower complexity than upcoming Delivery Address work. <strong>Velocity target for Sprint 2 should remain at 26 pts</strong> rather than increasing, as story complexity is expected to rise significantly.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Capacity Utilisation -->
+        <div class="card">
+          <div class="card-header">
+            <h2><span>&#128200;</span> Capacity Utilisation Analysis</h2>
+          </div>
+          <div class="card-body">
+            <div class="capacity-heatmap">
+              <div class="heatmap-header" style="text-align: left; padding-left: 8px;">Team</div>
+              <div class="heatmap-header">Sprint 1</div>
+              <div class="heatmap-header">Sprint 2 (proj)</div>
+              <div class="heatmap-header">Sprint 3 (plan)</div>
+
+              <div class="heatmap-label">Dev Alpha</div>
+              <div class="heatmap-cell optimal">82%</div>
+              <div class="heatmap-cell high">92%</div>
+              <div class="heatmap-cell mid">88%</div>
+
+              <div class="heatmap-label">Dev Beta</div>
+              <div class="heatmap-cell low">68%</div>
+              <div class="heatmap-cell optimal">78%</div>
+              <div class="heatmap-cell optimal">82%</div>
+
+              <div class="heatmap-label">QA Team</div>
+              <div class="heatmap-cell optimal">75%</div>
+              <div class="heatmap-cell mid">85%</div>
+              <div class="heatmap-cell high">95%</div>
+
+              <div class="heatmap-label">Integration</div>
+              <div class="heatmap-cell low">55%</div>
+              <div class="heatmap-cell low">65%</div>
+              <div class="heatmap-cell optimal">80%</div>
+
+              <div class="heatmap-label">BA / Analysis</div>
+              <div class="heatmap-cell optimal">80%</div>
+              <div class="heatmap-cell low">70%</div>
+              <div class="heatmap-cell low">60%</div>
+            </div>
+
+            <div class="divider"></div>
+            <div style="margin-bottom: 12px;">
+              <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px;">Heatmap Legend</div>
+              <div class="legend">
+                <div class="legend-item"><div class="legend-dot" style="background: #ecfdf5"></div> Under 70% (capacity available)</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #eff6ff"></div> 70-85% (optimal)</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #fffbeb"></div> 85-90% (watch)</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #fef2f2"></div> 90%+ (overloaded)</div>
+              </div>
+            </div>
+
+            <div class="ai-insight">
+              <div class="ai-header">
+                <span class="spark">&#10024;</span> Capacity Recommendation
+              </div>
+              <ul>
+                <li><strong>Dev Alpha overloaded:</strong> Sprint 2 at 92% and projected Sprint 3 at 88%. Recommend shifting 2-3 stories to Dev Beta who have headroom (78%).</li>
+                <li><strong>QA bottleneck forming:</strong> QA capacity rises from 75% to projected 95% in Sprint 3. This is the #1 capacity risk. Request additional QA resource or implement automated regression.</li>
+                <li><strong>BA capacity freeing up:</strong> BA team drops from 80% to 60% as analysis work front-loads. Redeploy BA resource to support QA test case creation.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Retro Actions Tracker -->
+    <div class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2><span>&#9989;</span> Retro Actions Tracker</h2>
+          <span class="card-badge">Sprint-over-sprint</span>
+        </div>
+        <div class="card-body">
+          <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">Tracking actions across sprints to ensure follow-through</div>
+          <div class="action-item-row">
+            <div class="action-checkbox checked">&#10003;</div>
+            <div class="action-content">
+              <div class="action-title">Schedule spike for delivery address complexity assessment</div>
+              <div class="action-meta">Sprint 1 Retro &bull; Owner: Tech Lead &bull; Completed: Mar 11</div>
+            </div>
+            <span class="status-pill status-done">Done</span>
+          </div>
+          <div class="action-item-row">
+            <div class="action-checkbox checked">&#10003;</div>
+            <div class="action-content">
+              <div class="action-title">Set up monitoring alerts for test environment uptime</div>
+              <div class="action-meta">Sprint 1 Retro &bull; Owner: DevOps &bull; Completed: Mar 13</div>
+            </div>
+            <span class="status-pill status-done">Done</span>
+          </div>
+          <div class="action-item-row">
+            <div class="action-checkbox" style="border-color: var(--accent-blue); color: var(--accent-blue);">&#8943;</div>
+            <div class="action-content">
+              <div class="action-title">Create dependency tracking process for cross-team blockers</div>
+              <div class="action-meta">Sprint 1 Retro &bull; Owner: Scrum Master &bull; Due: Mar 24</div>
+            </div>
+            <span class="status-pill status-progress">In Progress</span>
+          </div>
+          <div class="action-item-row">
+            <div class="action-checkbox"></div>
+            <div class="action-content">
+              <div class="action-title">Document Fluent API integration patterns in team wiki</div>
+              <div class="action-meta">Sprint 1 Retro &bull; Owner: Dev Team &bull; Due: Mar 28</div>
+            </div>
+            <span class="status-pill status-todo">To Do</span>
+          </div>
+          <div class="action-item-row">
+            <div class="action-checkbox"></div>
+            <div class="action-content">
+              <div class="action-title">Explore automated regression testing to scale QA capacity</div>
+              <div class="action-meta">Sprint 1 Retro &bull; Owner: QA Lead &bull; Due: Sprint 3</div>
+            </div>
+            <span class="status-pill status-todo">To Do</span>
+          </div>
+          <div class="divider"></div>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+            <span style="color: var(--text-secondary);">Sprint 1 action completion rate:</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="progress-bar" style="width: 120px; height: 8px;">
+                <div class="fill green" style="width: 40%;"></div>
+              </div>
+              <strong>2/5 (40%)</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

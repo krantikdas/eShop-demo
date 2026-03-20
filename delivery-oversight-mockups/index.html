@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delivery Oversight - Agentic Reporting Suite</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, #0f3460 50%, #1a1a4e 100%);
+      color: white;
+      padding: 60px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(59,130,246,0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 50%, rgba(139,92,246,0.15) 0%, transparent 50%);
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+    .hero h1 span { color: #93c5fd; }
+    .hero .hero-sub {
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.6;
+      max-width: 600px;
+      margin: 0 auto 8px;
+    }
+    .hero .hero-tag {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 6px 16px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+    }
+    .agent-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1000px;
+      margin: -40px auto 40px;
+      padding: 0 24px;
+      position: relative;
+      z-index: 2;
+    }
+    .agent-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: var(--text);
+      display: block;
+    }
+    .agent-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+      border-color: var(--accent-blue);
+    }
+    .agent-card .ac-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+    .agent-card .ac-category {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .agent-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+    .agent-card p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .agent-card .ac-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .agent-card .ac-feature {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    .agent-card .ac-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+    .agent-card .ac-cta .arrow {
+      transition: transform 0.2s;
+    }
+    .agent-card:hover .ac-cta .arrow { transform: translateX(4px); }
+    .data-source {
+      max-width: 1000px;
+      margin: 0 auto 40px;
+      padding: 0 24px;
+    }
+    .data-source-card {
+      background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+      border: 1px solid #dbeafe;
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .data-source-card .ds-icon {
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      flex-shrink: 0;
+    }
+    .data-source-card .ds-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .data-source-card .ds-text p { font-size: 12px; color: var(--text-secondary); }
+  </style>
+</head>
+<body style="background: #f8fafc;">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-content">
+      <h1>delivery oversight: <span>agentic reporting suite</span></h1>
+      <p class="hero-sub">Leveraging AI to minimise resource costs, drive speed &amp; create futureproofed tooling across delivery planning &amp; reporting.</p>
+      <div class="hero-tag">DFS OMS R1 &mdash; Demo &bull; Powered by Jira Data &bull; 465 Items Tracked</div>
+    </div>
+  </div>
+
+  <!-- Agent Cards -->
+  <div class="agent-cards">
+    <!-- Planner Agent -->
+    <a href="planner-agent.html" class="agent-card">
+      <div class="ac-icon" style="background: linear-gradient(135deg, #eff6ff, #dbeafe);">&#128197;</div>
+      <div class="ac-category">Planning &amp; Dependency Management</div>
+      <h3>Planner Agent</h3>
+      <p>Generation of cross-stream project schedule and plan with base capacity and skills constraints optimised. Assists in sprint-level themes and recommended across-team priorities from backlog and technical architecture/design.</p>
+      <div class="ac-features">
+        <span class="ac-feature tag-blue">Gantt Schedule</span>
+        <span class="ac-feature tag-purple">Capacity Planning</span>
+        <span class="ac-feature tag-green">Sprint Themes</span>
+        <span class="ac-feature tag-amber">Skills Mapping</span>
+      </div>
+      <div class="ac-cta">View Planner Agent <span class="arrow">&#8594;</span></div>
+    </a>
+
+    <!-- PlanMonitor -->
+    <a href="plan-monitor.html" class="agent-card">
+      <div class="ac-icon" style="background: linear-gradient(135deg, #f5f3ff, #ede9fe);">&#128203;</div>
+      <div class="ac-category">Planning &amp; Dependency Management</div>
+      <h3>PlanMonitor</h3>
+      <p>Auto-review of workstream plans, sprint monitoring, identify and track dependencies, recommend prioritised tasks and risks. Real-time burndown tracking with AI-powered deviation alerts.</p>
+      <div class="ac-features">
+        <span class="ac-feature tag-blue">Burndown</span>
+        <span class="ac-feature tag-red">Dependency Map</span>
+        <span class="ac-feature tag-amber">Risk Register</span>
+        <span class="ac-feature tag-purple">Priority Actions</span>
+      </div>
+      <div class="ac-cta">View PlanMonitor <span class="arrow">&#8594;</span></div>
+    </a>
+
+    <!-- ProgressPack -->
+    <a href="progress-pack.html" class="agent-card">
+      <div class="ac-icon" style="background: linear-gradient(135deg, #ecfdf5, #d1fae5);">&#128209;</div>
+      <div class="ac-category">Tracking &amp; Reporting</div>
+      <h3>ProgressPack</h3>
+      <p>Auto-generates weekly/fortnightly board packs from sprint data, RAID logs, velocity metrics &amp; quality dashboards. Narrative summaries with RAG status for stakeholder communication.</p>
+      <div class="ac-features">
+        <span class="ac-feature tag-green">Board Pack</span>
+        <span class="ac-feature tag-blue">Velocity Charts</span>
+        <span class="ac-feature tag-red">RAID Log</span>
+        <span class="ac-feature tag-amber">RAG Narratives</span>
+      </div>
+      <div class="ac-cta">View ProgressPack <span class="arrow">&#8594;</span></div>
+    </a>
+
+    <!-- RetroAssistant -->
+    <a href="retro-assistant.html" class="agent-card">
+      <div class="ac-icon" style="background: linear-gradient(135deg, #fffbeb, #fef3c7);">&#128173;</div>
+      <div class="ac-category">Tracking &amp; Reporting</div>
+      <h3>RetroAssistant</h3>
+      <p>AI-assisted retro analysis, automated team metrics and capacity utilisation analysis. Theme clustering, sentiment analysis, and sprint-over-sprint action tracking.</p>
+      <div class="ac-features">
+        <span class="ac-feature tag-purple">Retro Board</span>
+        <span class="ac-feature tag-blue">Team Metrics</span>
+        <span class="ac-feature tag-amber">Capacity Heatmap</span>
+        <span class="ac-feature tag-green">Action Tracker</span>
+      </div>
+      <div class="ac-cta">View RetroAssistant <span class="arrow">&#8594;</span></div>
+    </a>
+  </div>
+
+  <!-- Data Source -->
+  <div class="data-source">
+    <div class="data-source-card">
+      <div class="ds-icon">&#128279;</div>
+      <div class="ds-text">
+        <h4>Connected to Jira: DFS OMS R1 - Demo (DORD)</h4>
+        <p>Live data from orchestraite.atlassian.net &bull; 14 Epics &bull; 194 Stories &bull; 257 Tests &bull; 3 Sprints &bull; Last synced: 20 Mar 2026</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
