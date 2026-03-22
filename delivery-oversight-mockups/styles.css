@@ -58,14 +58,21 @@ body {
 }
 
 .topbar-brand .logo-icon {
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 36px;
   background: transparent;
-  border-radius: 8px;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  overflow: hidden;
+}
+
+.topbar-brand .logo-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .topbar-brand .logo-icon svg {
