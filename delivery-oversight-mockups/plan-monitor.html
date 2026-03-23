@@ -536,17 +536,22 @@
     #sprint-progress-pct { transition: all 0.5s ease; }
   </style>
   <script>
-    // Backend API URL - will be updated when deployed
-    const API_URL = 'https://delivery-reporting-app-tunnel-tyqvn2vo.devinapps.com';
-    const API_AUTH = 'Basic ' + btoa('user:2d819c6df5217a9ca7025b339001a24b');
+    // When served from the FastAPI backend (via tunnel), use same-origin requests
+    // window.location.origin strips any embedded credentials from the URL
+    const API_BASE = window.location.origin;
+    // Tunnel proxy auth (not sensitive - just tunnel access credentials)
+    const TUNNEL_AUTH = 'Basic ' + btoa('user:2d819c6df5217a9ca7025b339001a24b');
     let pollInterval = null;
     let lastData = null;
 
     async function fetchSprintData() {
       try {
-        const resp = await fetch(API_URL + '/api/sprint-status', {
-          headers: { 'Authorization': API_AUTH }
-        });
+        const fetchOpts = {};
+        // Add auth header for tunnel-served pages (same-origin, no CORS preflight)
+        if (window.location.hostname.includes('tunnel') || window.location.hostname.includes('devinapps')) {
+          fetchOpts.headers = { 'Authorization': TUNNEL_AUTH };
+        }
+        const resp = await fetch(API_BASE + '/api/sprint-status', fetchOpts);
         if (!resp.ok) throw new Error('API error: ' + resp.status);
         const data = await resp.json();
         updateUI(data);
@@ -664,8 +669,8 @@
     // Start polling when page loads
     function startPolling() {
       const banner = document.getElementById('live-sync-banner');
-      if (API_URL === 'BACKEND_URL_PLACEHOLDER') {
-        // Backend not configured yet - hide banner
+      // Only poll when served from backend (not file:// protocol)
+      if (window.location.protocol === 'file:') {
         if (banner) banner.style.display = 'none';
         return;
       }
