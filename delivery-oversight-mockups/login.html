@@ -38,7 +38,7 @@
       overflow: hidden;
     }
     .login-header {
-      background: linear-gradient(135deg, #5c2483 0%, #3d1759 100%);
+      background: #f1f1f1;
       padding: 36px 32px 28px;
       text-align: center;
     }
@@ -48,17 +48,17 @@
       margin-bottom: 16px;
     }
     .login-header h1 {
-      color: white;
+      color: #333;
       font-size: 20px;
       font-weight: 700;
       letter-spacing: -0.02em;
       margin-bottom: 4px;
     }
     .login-header h1 span {
-      color: #e9b0d3;
+      color: #5c2483;
     }
     .login-header p {
-      color: rgba(255,255,255,0.6);
+      color: #888;
       font-size: 13px;
     }
     .login-body {
@@ -177,7 +177,7 @@
       <form class="login-body" id="login-form" onsubmit="return handleLogin(event)">
         <label for="email">Work email address</label>
         <div class="input-wrapper">
-          <input type="email" id="email" name="email" placeholder="you@lumochange.com" autocomplete="email" autofocus required>
+          <input type="email" id="email" name="email" placeholder="Enter your work email" autocomplete="email" autofocus required>
         </div>
         <div class="error-message" id="error-msg"></div>
         <button type="submit" class="login-btn" id="login-btn">Sign In</button>
