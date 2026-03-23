@@ -195,14 +195,14 @@
       <div class="grid-4">
         <div class="stat-card">
           <div class="stat-label">Sprint 2 Progress</div>
-          <div class="stat-value" style="color: var(--accent-blue);">39%</div>
+          <div class="stat-value" style="color: var(--accent-blue);" id="sprint-progress-pct">39%</div>
           <div style="margin-top: 6px;">
-            <div class="progress-stacked">
-              <div class="segment" style="width: 39%; background: var(--accent-green);"></div>
-              <div class="segment" style="width: 21%; background: var(--accent-blue);"></div>
+            <div class="progress-stacked" id="sprint-progress-bar">
+              <div class="segment" style="width: 39%; background: var(--accent-green);" id="seg-done"></div>
+              <div class="segment" style="width: 21%; background: var(--accent-blue);" id="seg-progress"></div>
             </div>
           </div>
-          <div class="stat-change neutral">15 Done / 8 In Progress / 15 To Do</div>
+          <div class="stat-change neutral" id="sprint-status-text">15 Done / 8 In Progress / 15 To Do</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Dependencies Tracked</div>
@@ -254,11 +254,11 @@
                 <!-- Ideal line -->
                 <line x1="0" y1="0" x2="400" y2="200" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="6 4"/>
                 <!-- Actual burndown (behind ideal - amber state) -->
-                <polyline points="0,0 45,10 90,30 135,55 180,75 225,95 270,110" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linejoin="round"/>
-                <polygon points="0,0 45,10 90,30 135,55 180,75 225,95 270,110 270,200 0,200" fill="rgba(59,130,246,0.06)"/>
+                <polyline id="burndown-line" points="0,0 45,10 90,30 135,55 180,75 225,95 270,110" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linejoin="round"/>
+                <polygon id="burndown-area" points="0,0 45,10 90,30 135,55 180,75 225,95 270,110 270,200 0,200" fill="rgba(59,130,246,0.06)"/>
                 <!-- Today marker -->
-                <line x1="270" y1="0" x2="270" y2="200" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 3"/>
-                <text x="260" y="-4" font-size="9" fill="#ef4444" font-weight="600">Today</text>
+                <line id="today-marker" x1="270" y1="0" x2="270" y2="200" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 3"/>
+                <text id="today-label" x="260" y="-4" font-size="9" fill="#ef4444" font-weight="600">Today</text>
               </svg>
               <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 10px; color: var(--text-secondary);">
                 <span>Mar 10</span><span>Mar 13</span><span>Mar 16</span><span>Mar 19</span><span>Mar 22</span><span>Mar 24</span>
@@ -268,7 +268,7 @@
               <div class="ai-header">
                 <span class="spark">&#10024;</span> Burndown Analysis
               </div>
-              <p>Sprint is <strong>tracking 15% behind ideal</strong>. At current velocity (3.2 items/day), 8 items will remain incomplete at sprint end. Recommend: (1) de-scope 3 lower-priority MTO SoDelCo tests to Sprint 3, or (2) bring in additional QA resource for final 4 days.</p>
+              <p id="burndown-insight">Sprint is <strong>tracking 15% behind ideal</strong>. At current velocity (3.2 items/day), 8 items will remain incomplete at sprint end. Recommend: (1) de-scope 3 lower-priority MTO SoDelCo tests to Sprint 3, or (2) bring in additional QA resource for final 4 days.</p>
             </div>
           </div>
         </div>
@@ -277,7 +277,7 @@
         <div class="card">
           <div class="card-header">
             <h2><span>&#128203;</span> Workstream Status Review</h2>
-            <span class="timestamp">Last reviewed: 5 min ago</span>
+            <span class="timestamp" id="last-reviewed">Last reviewed: 5 min ago</span>
           </div>
           <div class="card-body" style="padding: 0;">
             <table class="data-table">
@@ -525,5 +525,156 @@
       </div>
     </div>
   </div>
+  <!-- Live Jira Polling -->
+  <div id="live-sync-banner" style="display:none; position:fixed; bottom:20px; right:20px; background:linear-gradient(135deg,#5c2483,#c7017f); color:white; padding:10px 20px; border-radius:12px; font-size:13px; font-weight:600; box-shadow:0 4px 20px rgba(92,36,131,0.3); z-index:1000; display:flex; align-items:center; gap:8px; transition: opacity 0.3s;">
+    <div style="width:8px;height:8px;border-radius:50%;background:#10b981;animation:pulse-dot 1.5s infinite;"></div>
+    <span id="sync-status">Connected to Jira &bull; Auto-refreshing every 10s</span>
+  </div>
+  <style>
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .stat-value, .stat-change { transition: all 0.5s ease; }
+    #sprint-progress-pct { transition: all 0.5s ease; }
+  </style>
+  <script>
+    // Backend API URL - will be updated when deployed
+    const API_URL = 'https://delivery-reporting-app-tunnel-tyqvn2vo.devinapps.com';
+    const API_AUTH = 'Basic ' + btoa('user:2d819c6df5217a9ca7025b339001a24b');
+    let pollInterval = null;
+    let lastData = null;
+
+    async function fetchSprintData() {
+      try {
+        const resp = await fetch(API_URL + '/api/sprint-status', {
+          headers: { 'Authorization': API_AUTH }
+        });
+        if (!resp.ok) throw new Error('API error: ' + resp.status);
+        const data = await resp.json();
+        updateUI(data);
+        lastData = data;
+        document.getElementById('sync-status').textContent =
+          'Connected to Jira \u2022 Last sync: ' + new Date().toLocaleTimeString();
+      } catch (err) {
+        console.error('Fetch error:', err);
+        document.getElementById('sync-status').textContent =
+          'Connection issue \u2022 Retrying...';
+      }
+    }
+
+    function updateUI(data) {
+      // Update sprint progress percentage
+      const pctEl = document.getElementById('sprint-progress-pct');
+      if (pctEl) {
+        const oldVal = parseFloat(pctEl.textContent);
+        const newVal = data.progress_pct;
+        animateValue(pctEl, oldVal, newVal, '%');
+      }
+
+      // Update progress bar segments
+      const segDone = document.getElementById('seg-done');
+      const segProg = document.getElementById('seg-progress');
+      if (segDone && segProg && data.total_issues > 0) {
+        const donePct = (data.done / data.total_issues * 100).toFixed(1);
+        const progPct = (data.in_progress / data.total_issues * 100).toFixed(1);
+        segDone.style.width = donePct + '%';
+        segProg.style.width = progPct + '%';
+      }
+
+      // Update status text
+      const statusEl = document.getElementById('sprint-status-text');
+      if (statusEl) {
+        statusEl.textContent = data.done + ' Done / ' + data.in_progress + ' In Progress / ' + data.todo + ' To Do';
+        // Flash green if done count increased
+        if (lastData && data.done > lastData.done) {
+          statusEl.style.color = '#10b981';
+          statusEl.style.fontWeight = '700';
+          setTimeout(() => { statusEl.style.color = ''; statusEl.style.fontWeight = ''; }, 3000);
+        }
+      }
+
+      // Update burndown chart
+      updateBurndown(data);
+
+      // Update AI insight
+      const insightEl = document.getElementById('burndown-insight');
+      if (insightEl) {
+        insightEl.innerHTML = data.ai_insight;
+      }
+
+      // Update last reviewed timestamp
+      const reviewedEl = document.getElementById('last-reviewed');
+      if (reviewedEl) {
+        reviewedEl.textContent = 'Last reviewed: ' + new Date().toLocaleTimeString();
+      }
+    }
+
+    function updateBurndown(data) {
+      const total = data.total_issues;
+      const done = data.done;
+      const remaining = total - done;
+      const daysFrac = data.days_elapsed / data.sprint_duration;
+
+      // Build burndown polyline points from day 0 to today
+      // We simulate a gradual burndown curve
+      const xMax = 400;
+      const yMax = 200;
+      const todayX = Math.round(daysFrac * xMax);
+      const remainingY = Math.round((remaining / total) * yMax);
+
+      // Create intermediate points for a realistic curve
+      const points = [];
+      const steps = Math.max(data.days_elapsed, 1);
+      for (let i = 0; i <= steps; i++) {
+        const frac = i / steps;
+        const x = Math.round(frac * todayX);
+        // Simulate slightly non-linear burndown
+        const idealRemaining = total * (1 - (frac * daysFrac));
+        const actualRemaining = remaining + (total - remaining) * Math.pow(1 - frac, 1.3) * 0;
+        // Interpolate from total to remaining
+        const y = Math.round((1 - ((total - (remaining + (total - remaining) * (1 - frac))) / total)) * yMax);
+        points.push(x + ',' + y);
+      }
+      // Ensure last point is at todayX, remainingY
+      points[points.length - 1] = todayX + ',' + remainingY;
+
+      const lineEl = document.getElementById('burndown-line');
+      const areaEl = document.getElementById('burndown-area');
+      const markerEl = document.getElementById('today-marker');
+      const labelEl = document.getElementById('today-label');
+
+      if (lineEl) lineEl.setAttribute('points', points.join(' '));
+      if (areaEl) areaEl.setAttribute('points', points.join(' ') + ' ' + todayX + ',' + yMax + ' 0,' + yMax);
+      if (markerEl) { markerEl.setAttribute('x1', todayX); markerEl.setAttribute('x2', todayX); }
+      if (labelEl) labelEl.setAttribute('x', todayX - 10);
+    }
+
+    function animateValue(el, start, end, suffix) {
+      const duration = 800;
+      const startTime = performance.now();
+      function step(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = start + (end - start) * eased;
+        el.textContent = current.toFixed(1) + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    // Start polling when page loads
+    function startPolling() {
+      const banner = document.getElementById('live-sync-banner');
+      if (API_URL === 'BACKEND_URL_PLACEHOLDER') {
+        // Backend not configured yet - hide banner
+        if (banner) banner.style.display = 'none';
+        return;
+      }
+      if (banner) banner.style.display = 'flex';
+      fetchSprintData();
+      pollInterval = setInterval(fetchSprintData, 10000);
+    }
+
+    window.addEventListener('load', startPolling);
+  </script>
 </body>
 </html>
