@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanMonitor - Delivery Oversight</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .dep-graph {
+      position: relative;
+      padding: 20px 0;
+    }
+    .dep-node {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 2px solid;
+      background: white;
+      position: relative;
+    }
+    .dep-node.done { border-color: var(--accent-green); color: #065f46; }
+    .dep-node.progress { border-color: var(--accent-blue); color: #1e40af; }
+    .dep-node.todo { border-color: #cbd5e1; color: #475569; }
+    .dep-node.blocked { border-color: var(--accent-red); color: #991b1b; background: #fef2f2; }
+    .dep-arrow {
+      display: inline-block;
+      color: #94a3b8;
+      font-size: 18px;
+      margin: 0 6px;
+      vertical-align: middle;
+    }
+    .dep-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    .risk-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .risk-item:last-child { border-bottom: none; }
+    .risk-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .risk-icon.high { background: #fef2f2; }
+    .risk-icon.medium { background: #fffbeb; }
+    .risk-icon.low { background: #eff6ff; }
+    .risk-content { flex: 1; }
+    .risk-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .risk-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+    .risk-meta {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+      font-size: 11px;
+    }
+    .burndown-chart {
+      position: relative;
+      height: 200px;
+      border-left: 2px solid var(--border);
+      border-bottom: 2px solid var(--border);
+      margin: 16px 0 8px 40px;
+    }
+    .burndown-chart .y-axis {
+      position: absolute;
+      left: -40px;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+    .burndown-chart .x-axis {
+      position: absolute;
+      bottom: -22px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+    .burndown-ideal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom right, transparent 49.5%, #cbd5e1 49.5%, #cbd5e1 50.5%, transparent 50.5%);
+    }
+    .burndown-actual {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .burndown-line {
+      fill: none;
+      stroke: var(--accent-blue);
+      stroke-width: 2.5;
+    }
+    .burndown-area {
+      fill: rgba(59, 130, 246, 0.08);
+    }
+    .burndown-ideal-line {
+      fill: none;
+      stroke: #cbd5e1;
+      stroke-width: 1.5;
+      stroke-dasharray: 6 4;
+    }
+    .priority-list-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 6px;
+      background: #fafbfc;
+      border: 1px solid #f1f5f9;
+      transition: background 0.15s;
+    }
+    .priority-list-item:hover { background: #f1f5f9; }
+    .priority-rank {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--accent-blue);
+      color: white;
+      flex-shrink: 0;
+    }
+    .priority-rank.warn { background: var(--accent-amber); }
+    .priority-rank.danger { background: var(--accent-red); }
+    .priority-content { flex: 1; }
+    .priority-title { font-size: 13px; font-weight: 500; }
+    .priority-sub { font-size: 11px; color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+  <script>
+    (function() {
+      var auth = localStorage.getItem('do_auth_email');
+      if (!auth || !auth.endsWith('@lumochange.com')) {
+        window.location.href = 'login.html';
+      }
+    })();
+  </script>
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="logo-icon"><img src="dfs_logo.png" alt="DFS" style="width:100%;height:100%;object-fit:contain;"></div>
+      <span>dfs | Delivery Oversight</span>
+    </div>
+    <div class="topbar-nav">
+      <a href="planner-agent.html">Planner Agent</a>
+      <a href="plan-monitor.html" class="active">PlanMonitor</a>
+      <a href="progress-pack.html">ProgressPack</a>
+      <a href="retro-assistant.html">RetroAssistant</a>
+    </div>
+    <div class="topbar-meta">
+      <div class="agent-badge">
+        <div class="pulse"></div>
+        PlanMonitor Active
+      </div>
+      <span>DFS OMS R1</span>
+      <a href="#" onclick="localStorage.removeItem('do_auth_email');localStorage.removeItem('do_auth_time');window.location.href='login.html';return false;" style="font-size:11px;color:rgba(255,255,255,0.5);text-decoration:none;margin-left:8px;">Sign Out</a>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <div class="page-header">
+      <div class="agent-label">
+        <span>&#9670;</span> PlanMonitor
+      </div>
+      <h1>Sprint Monitoring &amp; Dependency Tracker</h1>
+      <p class="subtitle">Auto-review of workstream plans | Dependency identification | Prioritised task &amp; risk recommendations</p>
+    </div>
+
+    <!-- Sprint Health KPIs -->
+    <div class="section">
+      <div class="grid-4">
+        <div class="stat-card">
+          <div class="stat-label">Sprint 2 Progress</div>
+          <div class="stat-value" style="color: var(--accent-blue);" id="sprint-progress-pct">39%</div>
+          <div style="margin-top: 6px;">
+            <div class="progress-stacked" id="sprint-progress-bar">
+              <div class="segment" style="width: 39%; background: var(--accent-green);" id="seg-done"></div>
+              <div class="segment" style="width: 21%; background: var(--accent-blue);" id="seg-progress"></div>
+            </div>
+          </div>
+          <div class="stat-change neutral" id="sprint-status-text">15 Done / 8 In Progress / 15 To Do</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Dependencies Tracked</div>
+          <div class="stat-value">7</div>
+          <div class="stat-change down">2 at risk of blocking</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Sprint Health</div>
+          <div class="stat-value">
+            <span class="rag-badge rag-amber"><span class="rag-dot"></span> Amber</span>
+          </div>
+          <div class="stat-change down">Was Green last review</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Risks Flagged</div>
+          <div class="stat-value" style="color: var(--accent-red);">3</div>
+          <div class="stat-change down">1 new since yesterday</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Burndown + Status Table -->
+    <div class="section">
+      <div class="grid-2">
+        <!-- Burndown -->
+        <div class="card">
+          <div class="card-header">
+            <h2>
+              <span>&#128200;</span> Sprint 2 Burndown
+              <span class="card-badge">Live</span>
+            </h2>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background: #cbd5e1"></div> Ideal</div>
+              <div class="legend-item"><div class="legend-dot" style="background: var(--accent-blue)"></div> Actual</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="position: relative; height: 200px; margin-left: 40px;">
+              <div style="position: absolute; left: -40px; top: 0; font-size: 10px; color: var(--text-secondary);">38</div>
+              <div style="position: absolute; left: -40px; top: 25%; font-size: 10px; color: var(--text-secondary);">28</div>
+              <div style="position: absolute; left: -40px; top: 50%; font-size: 10px; color: var(--text-secondary);">19</div>
+              <div style="position: absolute; left: -40px; top: 75%; font-size: 10px; color: var(--text-secondary);">10</div>
+              <div style="position: absolute; left: -40px; bottom: 0; font-size: 10px; color: var(--text-secondary);">0</div>
+              <svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="none">
+                <!-- Grid lines -->
+                <line x1="0" y1="50" x2="400" y2="50" stroke="#f1f5f9" stroke-width="1"/>
+                <line x1="0" y1="100" x2="400" y2="100" stroke="#f1f5f9" stroke-width="1"/>
+                <line x1="0" y1="150" x2="400" y2="150" stroke="#f1f5f9" stroke-width="1"/>
+                <!-- Ideal line -->
+                <line x1="0" y1="0" x2="400" y2="200" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="6 4"/>
+                <!-- Actual burndown (behind ideal - amber state) -->
+                <polyline id="burndown-line" points="0,0 45,10 90,30 135,55 180,75 225,95 270,110" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linejoin="round"/>
+                <polygon id="burndown-area" points="0,0 45,10 90,30 135,55 180,75 225,95 270,110 270,200 0,200" fill="rgba(59,130,246,0.06)"/>
+                <!-- Today marker -->
+                <line id="today-marker" x1="270" y1="0" x2="270" y2="200" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 3"/>
+                <text id="today-label" x="260" y="-4" font-size="9" fill="#ef4444" font-weight="600">Today</text>
+              </svg>
+              <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 10px; color: var(--text-secondary);">
+                <span>Mar 10</span><span>Mar 13</span><span>Mar 16</span><span>Mar 19</span><span>Mar 22</span><span>Mar 24</span>
+              </div>
+            </div>
+            <div class="ai-insight" style="margin-top: 12px;">
+              <div class="ai-header">
+                <span class="spark">&#10024;</span> Burndown Analysis
+              </div>
+              <p id="burndown-insight">Sprint is <strong>tracking 15% behind ideal</strong>. At current velocity (3.2 items/day), 8 items will remain incomplete at sprint end. Recommend: (1) de-scope 3 lower-priority MTO SoDelCo tests to Sprint 3, or (2) bring in additional QA resource for final 4 days.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workstream Status -->
+        <div class="card">
+          <div class="card-header">
+            <h2><span>&#128203;</span> Workstream Status Review</h2>
+            <span class="timestamp" id="last-reviewed">Last reviewed: 5 min ago</span>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Epic</th>
+                  <th>Sprint</th>
+                  <th>Progress</th>
+                  <th>RAG</th>
+                  <th>Items</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="tag tag-blue">DORD-1</span> Title Amend</td>
+                  <td>S1</td>
+                  <td>
+                    <div class="progress-bar" style="width: 120px; height: 6px;">
+                      <div class="fill green" style="width: 100%;"></div>
+                    </div>
+                  </td>
+                  <td><span class="rag-badge rag-green" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Green</span></td>
+                  <td>6/6</td>
+                </tr>
+                <tr>
+                  <td><span class="tag tag-blue">DORD-2</span> Name Amend</td>
+                  <td>S1</td>
+                  <td>
+                    <div class="progress-bar" style="width: 120px; height: 6px;">
+                      <div class="fill green" style="width: 100%;"></div>
+                    </div>
+                  </td>
+                  <td><span class="rag-badge rag-green" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Green</span></td>
+                  <td>12/12</td>
+                </tr>
+                <tr>
+                  <td><span class="tag tag-blue">DORD-3</span> Address Amend</td>
+                  <td>S1</td>
+                  <td>
+                    <div class="progress-bar" style="width: 120px; height: 6px;">
+                      <div class="fill green" style="width: 100%;"></div>
+                    </div>
+                  </td>
+                  <td><span class="rag-badge rag-green" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Green</span></td>
+                  <td>8/8</td>
+                </tr>
+                <tr>
+                  <td><span class="tag tag-purple">DORD-4</span> Email Amend</td>
+                  <td>S2</td>
+                  <td>
+                    <div class="progress-stacked" style="width: 120px; height: 6px;">
+                      <div class="segment" style="width: 43%; background: var(--accent-green);"></div>
+                      <div class="segment" style="width: 29%; background: var(--accent-blue);"></div>
+                    </div>
+                  </td>
+                  <td><span class="rag-badge rag-green" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Green</span></td>
+                  <td>3/7</td>
+                </tr>
+                <tr>
+                  <td><span class="tag tag-purple">DORD-5</span> Phone Amend</td>
+                  <td>S2</td>
+                  <td>
+                    <div class="progress-stacked" style="width: 120px; height: 6px;">
+                      <div class="segment" style="width: 38%; background: var(--accent-green);"></div>
+                      <div class="segment" style="width: 25%; background: var(--accent-blue);"></div>
+                    </div>
+                  </td>
+                  <td><span class="rag-badge rag-amber" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Amber</span></td>
+                  <td>3/8</td>
+                </tr>
+                <tr>
+                  <td><span class="tag tag-purple">DORD-7</span> MTO SoDelCo</td>
+                  <td>S2</td>
+                  <td>
+                    <div class="progress-stacked" style="width: 120px; height: 6px;">
+                      <div class="segment" style="width: 35%; background: var(--accent-green);"></div>
+                      <div class="segment" style="width: 18%; background: var(--accent-blue);"></div>
+                    </div>
+                  </td>
+                  <td><span class="rag-badge rag-amber" style="padding: 2px 8px; font-size: 10px;"><span class="rag-dot"></span> Amber</span></td>
+                  <td>6/17</td>
+                </tr>
+                <tr>
+                  <td><span class="tag tag-gray">DORD-8</span> Stock Code SoDelCo</td>
+                  <td>S3</td>
+                  <td>
+                    <div class="progress-bar" style="width: 120px; height: 6px;">
+                      <div class="fill" style="width: 0%; background: #94a3b8;"></div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-gray">Planned</span></td>
+                  <td>0/16</td>
+                </tr>
+                <tr>
+                  <td><span class="tag tag-gray">DORD-9</span> Upholstery SoDelCo</td>
+                  <td>S3</td>
+                  <td>
+                    <div class="progress-bar" style="width: 120px; height: 6px;">
+                      <div class="fill" style="width: 0%; background: #94a3b8;"></div>
+                    </div>
+                  </td>
+                  <td><span class="tag tag-gray">Planned</span></td>
+                  <td>0/6</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dependency Map + Risks -->
+    <div class="section">
+      <div class="grid-2">
+        <!-- Dependencies -->
+        <div class="card">
+          <div class="card-header">
+            <h2>
+              <span>&#128279;</span> Dependency Map
+              <span class="card-badge">7 tracked</span>
+            </h2>
+          </div>
+          <div class="card-body">
+            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">Cross-epic dependencies identified by PlanMonitor</div>
+            <div class="dep-row">
+              <div class="dep-node done">DORD-1 Title &#10003;</div>
+              <span class="dep-arrow">&#8594;</span>
+              <div class="dep-node done">DORD-2 Name &#10003;</div>
+              <span class="dep-arrow">&#8594;</span>
+              <div class="dep-node done">DORD-3 Address &#10003;</div>
+            </div>
+            <div class="dep-row">
+              <div class="dep-node done">DORD-3 Address &#10003;</div>
+              <span class="dep-arrow">&#8594;</span>
+              <div class="dep-node progress">DORD-4 Email &#9881;</div>
+              <span class="dep-arrow">&#8594;</span>
+              <div class="dep-node progress">DORD-5 Phone &#9881;</div>
+            </div>
+            <div class="dep-row">
+              <div class="dep-node progress">DORD-7 MTO SoDelCo &#9881;</div>
+              <span class="dep-arrow">&#8594;</span>
+              <div class="dep-node todo">DORD-8 Stock Code</div>
+              <span class="dep-arrow">&#8594;</span>
+              <div class="dep-node todo">DORD-9 Upholstery</div>
+            </div>
+            <div class="dep-row">
+              <div class="dep-node progress">DORD-7 MTO SoDelCo &#9881;</div>
+              <span class="dep-arrow">&#8594;</span>
+              <div class="dep-node blocked">DORD-10 3PL DSV &#9888;</div>
+              <span style="font-size: 11px; color: var(--accent-red); font-weight: 600; margin-left: 8px;">BLOCKED - awaiting OMS API v2</span>
+            </div>
+            <div class="dep-row">
+              <div class="dep-node todo">DORD-10 3PL DSV</div>
+              <span class="dep-arrow">&#8594;</span>
+              <div class="dep-node todo">DORD-11 3PL DHD</div>
+              <span class="dep-arrow">&#8594;</span>
+              <div class="dep-node todo">DORD-12 DHD Direct</div>
+            </div>
+            <div class="ai-insight">
+              <div class="ai-header">
+                <span class="spark">&#10024;</span> Dependency Alert
+              </div>
+              <p><strong>Critical chain risk:</strong> DORD-10 (3PL DSV) is blocked on OMS API v2 deployment, which gates DORD-11 and DORD-12. If OMS API isn't available by Sprint 4 start (Apr 7), this will push final delivery by 2 sprints. <strong>Recommended action:</strong> Escalate OMS API timeline to platform team this week.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risks & Prioritised Tasks -->
+        <div class="card">
+          <div class="card-header">
+            <h2>
+              <span>&#9888;</span> Prioritised Risks &amp; Actions
+              <span class="card-badge" style="background: #fef2f2; color: #991b1b;">3 Active</span>
+            </h2>
+          </div>
+          <div class="card-body">
+            <div class="risk-item">
+              <div class="risk-icon high">&#128308;</div>
+              <div class="risk-content">
+                <div class="risk-title">OMS API v2 Dependency Blocker</div>
+                <div class="risk-desc">3PL Home DSV (DORD-10) requires OMS API v2 for delivery routing. API deployment date currently TBC. Blocks 3 downstream epics with 174 combined stories/tests.</div>
+                <div class="risk-meta">
+                  <span class="tag tag-red">High</span>
+                  <span class="tag tag-blue">DORD-10</span>
+                  <span style="color: var(--text-secondary);">Impact: 3 epics, ~8 sprints of work</span>
+                </div>
+              </div>
+            </div>
+            <div class="risk-item">
+              <div class="risk-icon medium">&#128992;</div>
+              <div class="risk-content">
+                <div class="risk-title">MTO SoDelCo Sprint 2 Velocity Drop</div>
+                <div class="risk-desc">Epic 4 stories are taking 40% longer than estimated. Delivery address amendment flows have higher complexity than Customer Info. Sprint 2 likely to carry over 5-8 items.</div>
+                <div class="risk-meta">
+                  <span class="tag tag-amber">Medium</span>
+                  <span class="tag tag-purple">DORD-7</span>
+                  <span style="color: var(--text-secondary);">Impact: Sprint 2 scope, Sprint 3 capacity</span>
+                </div>
+              </div>
+            </div>
+            <div class="risk-item">
+              <div class="risk-icon medium">&#128992;</div>
+              <div class="risk-content">
+                <div class="risk-title">QA Capacity Bottleneck</div>
+                <div class="risk-desc">257 test cases total, QA team completing ~8 tests/sprint. At current rate, testing backlog will grow. Sprint 3 has 6 tests queued but Sprint 2 carryover likely to add more.</div>
+                <div class="risk-meta">
+                  <span class="tag tag-amber">Medium</span>
+                  <span class="tag tag-gray">QA Team</span>
+                  <span style="color: var(--text-secondary);">Impact: Overall delivery timeline</span>
+                </div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <h3 style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">&#127937; Recommended Priority Actions</h3>
+            <div class="priority-list-item">
+              <div class="priority-rank danger">1</div>
+              <div class="priority-content">
+                <div class="priority-title">Escalate OMS API v2 timeline to platform team</div>
+                <div class="priority-sub">Owner: Delivery Lead &bull; Due: This week &bull; Blocks 174 items</div>
+              </div>
+            </div>
+            <div class="priority-list-item">
+              <div class="priority-rank warn">2</div>
+              <div class="priority-content">
+                <div class="priority-title">Re-estimate MTO SoDelCo remaining stories</div>
+                <div class="priority-sub">Owner: Scrum Master &bull; Due: Sprint 2 mid-point &bull; 11 stories remaining</div>
+              </div>
+            </div>
+            <div class="priority-list-item">
+              <div class="priority-rank warn">3</div>
+              <div class="priority-content">
+                <div class="priority-title">Request additional QA resource for Sprint 3</div>
+                <div class="priority-sub">Owner: Delivery Manager &bull; Due: Before Sprint 3 planning &bull; 22+ tests queued</div>
+              </div>
+            </div>
+            <div class="priority-list-item">
+              <div class="priority-rank">4</div>
+              <div class="priority-content">
+                <div class="priority-title">Begin Sprint 3 backlog refinement for Stock Code SoDelCo</div>
+                <div class="priority-sub">Owner: BA Team &bull; Due: Mar 21 &bull; 12 unestimated stories</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Live Jira Polling -->
+  <div id="live-sync-banner" style="display:none; position:fixed; bottom:20px; right:20px; background:linear-gradient(135deg,#5c2483,#c7017f); color:white; padding:10px 20px; border-radius:12px; font-size:13px; font-weight:600; box-shadow:0 4px 20px rgba(92,36,131,0.3); z-index:1000; display:flex; align-items:center; gap:8px; transition: opacity 0.3s;">
+    <div style="width:8px;height:8px;border-radius:50%;background:#10b981;animation:pulse-dot 1.5s infinite;"></div>
+    <span id="sync-status">Connected to Jira &bull; Auto-refreshing every 10s</span>
+  </div>
+  <style>
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .stat-value, .stat-change { transition: all 0.5s ease; }
+    #sprint-progress-pct { transition: all 0.5s ease; }
+  </style>
+  <script>
+    // When served from the FastAPI backend (via tunnel), use same-origin requests
+    // window.location.origin strips any embedded credentials from the URL
+    const API_BASE = window.location.origin;
+    // Tunnel proxy auth (not sensitive - just tunnel access credentials)
+    const TUNNEL_AUTH = 'Basic ' + btoa('user:99664f37db91f3c1655d7e786180b915');
+    let pollInterval = null;
+    let lastData = null;
+
+    async function fetchSprintData() {
+      try {
+        const fetchOpts = {};
+        // Add auth header for tunnel-served pages (same-origin, no CORS preflight)
+        if (window.location.hostname.includes('tunnel') || window.location.hostname.includes('devinapps')) {
+          fetchOpts.headers = { 'Authorization': TUNNEL_AUTH };
+        }
+        const resp = await fetch(API_BASE + '/api/sprint-status', fetchOpts);
+        if (!resp.ok) throw new Error('API error: ' + resp.status);
+        const data = await resp.json();
+        updateUI(data);
+        lastData = data;
+        document.getElementById('sync-status').textContent =
+          'Connected to Jira \u2022 Last sync: ' + new Date().toLocaleTimeString();
+      } catch (err) {
+        console.error('Fetch error:', err);
+        document.getElementById('sync-status').textContent =
+          'Connection issue \u2022 Retrying...';
+      }
+    }
+
+    function updateUI(data) {
+      // Update sprint progress percentage
+      const pctEl = document.getElementById('sprint-progress-pct');
+      if (pctEl) {
+        const oldVal = parseFloat(pctEl.textContent);
+        const newVal = data.progress_pct;
+        animateValue(pctEl, oldVal, newVal, '%');
+      }
+
+      // Update progress bar segments
+      const segDone = document.getElementById('seg-done');
+      const segProg = document.getElementById('seg-progress');
+      if (segDone && segProg && data.total_issues > 0) {
+        const donePct = (data.done / data.total_issues * 100).toFixed(1);
+        const progPct = (data.in_progress / data.total_issues * 100).toFixed(1);
+        segDone.style.width = donePct + '%';
+        segProg.style.width = progPct + '%';
+      }
+
+      // Update status text
+      const statusEl = document.getElementById('sprint-status-text');
+      if (statusEl) {
+        statusEl.textContent = data.done + ' Done / ' + data.in_progress + ' In Progress / ' + data.todo + ' To Do';
+        // Flash green if done count increased
+        if (lastData && data.done > lastData.done) {
+          statusEl.style.color = '#10b981';
+          statusEl.style.fontWeight = '700';
+          setTimeout(() => { statusEl.style.color = ''; statusEl.style.fontWeight = ''; }, 3000);
+        }
+      }
+
+      // Update burndown chart
+      updateBurndown(data);
+
+      // Update AI insight
+      const insightEl = document.getElementById('burndown-insight');
+      if (insightEl) {
+        insightEl.innerHTML = data.ai_insight;
+      }
+
+      // Update last reviewed timestamp
+      const reviewedEl = document.getElementById('last-reviewed');
+      if (reviewedEl) {
+        reviewedEl.textContent = 'Last reviewed: ' + new Date().toLocaleTimeString();
+      }
+    }
+
+    function updateBurndown(data) {
+      const total = data.total_issues;
+      const done = data.done;
+      const remaining = total - done;
+      const daysFrac = data.days_elapsed / data.sprint_duration;
+
+      // Build burndown polyline points from day 0 to today
+      // We simulate a gradual burndown curve
+      const xMax = 400;
+      const yMax = 200;
+      const todayX = Math.round(daysFrac * xMax);
+      const remainingY = Math.round((remaining / total) * yMax);
+
+      // Create intermediate points for a realistic curve
+      const points = [];
+      const steps = Math.max(data.days_elapsed, 1);
+      for (let i = 0; i <= steps; i++) {
+        const frac = i / steps;
+        const x = Math.round(frac * todayX);
+        // Simulate slightly non-linear burndown
+        const idealRemaining = total * (1 - (frac * daysFrac));
+        const actualRemaining = remaining + (total - remaining) * Math.pow(1 - frac, 1.3) * 0;
+        // Interpolate from total to remaining
+        const y = Math.round((1 - ((total - (remaining + (total - remaining) * (1 - frac))) / total)) * yMax);
+        points.push(x + ',' + y);
+      }
+      // Ensure last point is at todayX, remainingY
+      points[points.length - 1] = todayX + ',' + remainingY;
+
+      const lineEl = document.getElementById('burndown-line');
+      const areaEl = document.getElementById('burndown-area');
+      const markerEl = document.getElementById('today-marker');
+      const labelEl = document.getElementById('today-label');
+
+      if (lineEl) lineEl.setAttribute('points', points.join(' '));
+      if (areaEl) areaEl.setAttribute('points', points.join(' ') + ' ' + todayX + ',' + yMax + ' 0,' + yMax);
+      if (markerEl) { markerEl.setAttribute('x1', todayX); markerEl.setAttribute('x2', todayX); }
+      if (labelEl) labelEl.setAttribute('x', todayX - 10);
+    }
+
+    function animateValue(el, start, end, suffix) {
+      const duration = 800;
+      const startTime = performance.now();
+      function step(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = start + (end - start) * eased;
+        el.textContent = current.toFixed(1) + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    // Start polling when page loads
+    function startPolling() {
+      const banner = document.getElementById('live-sync-banner');
+      // Only poll when served from backend (not file:// protocol)
+      if (window.location.protocol === 'file:') {
+        if (banner) banner.style.display = 'none';
+        return;
+      }
+      if (banner) banner.style.display = 'flex';
+      fetchSprintData();
+      pollInterval = setInterval(fetchSprintData, 10000);
+    }
+
+    window.addEventListener('load', startPolling);
+  </script>
+</body>
+</html>

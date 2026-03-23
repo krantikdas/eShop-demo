@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - Delivery Oversight</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #5c2483 0%, #3d1759 50%, #2a0e40 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 20% 30%, rgba(199,1,127,0.2) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 70%, rgba(92,36,131,0.2) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .login-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 440px;
+      padding: 0 24px;
+    }
+    .login-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .login-header {
+      background: #f1f1f1;
+      padding: 36px 32px 28px;
+      text-align: center;
+    }
+    .login-header img {
+      width: 140px;
+      height: auto;
+      margin-bottom: 16px;
+    }
+    .login-header h1 {
+      color: #333;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+    .login-header h1 span {
+      color: #5c2483;
+    }
+    .login-header p {
+      color: #888;
+      font-size: 13px;
+    }
+    .login-body {
+      padding: 32px;
+    }
+    .login-body label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+    .login-body .input-wrapper {
+      position: relative;
+      margin-bottom: 8px;
+    }
+    .login-body input[type="email"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      color: #1e293b;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .login-body input[type="email"]:focus {
+      border-color: #5c2483;
+      box-shadow: 0 0 0 3px rgba(92,36,131,0.1);
+    }
+    .login-body input[type="email"].error {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+    }
+    .error-message {
+      font-size: 12px;
+      color: #ef4444;
+      margin-bottom: 16px;
+      min-height: 18px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #5c2483, #c7017f);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: -0.01em;
+    }
+    .login-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(92,36,131,0.4);
+    }
+    .login-btn:active {
+      transform: translateY(0);
+    }
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .login-footer {
+      padding: 0 32px 28px;
+      text-align: center;
+    }
+    .login-footer p {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .login-footer .domain-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f3e8ff;
+      color: #5c2483;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .powered-by {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+    }
+    .powered-by a {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <img src="dfs_logo.png" alt="DFS">
+        <h1>delivery oversight: <span>agentic suite</span></h1>
+        <p>AI-powered delivery planning & reporting</p>
+      </div>
+      <form class="login-body" id="login-form" onsubmit="return handleLogin(event)">
+        <label for="email">Work email address</label>
+        <div class="input-wrapper">
+          <input type="email" id="email" name="email" placeholder="Enter your work email" autocomplete="email" autofocus required>
+        </div>
+        <div class="error-message" id="error-msg"></div>
+        <button type="submit" class="login-btn" id="login-btn">Sign In</button>
+      </form>
+      <div class="login-footer">
+        <p>Access is restricted to authorised team members.</p>
+      </div>
+    </div>
+    <div class="powered-by">
+      DFS OMS R1 &mdash; Demo &bull; Powered by Jira Data
+    </div>
+  </div>
+
+  <script>
+    // Check if already logged in
+    (function() {
+      const auth = localStorage.getItem('do_auth_email');
+      if (auth && auth.endsWith('@lumochange.com')) {
+        window.location.href = 'index.html';
+      }
+    })();
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const errorEl = document.getElementById('error-msg');
+      const input = document.getElementById('email');
+      const btn = document.getElementById('login-btn');
+
+      // Clear previous error
+      errorEl.textContent = '';
+      input.classList.remove('error');
+
+      // Validate email format
+      if (!email || !email.includes('@')) {
+        errorEl.textContent = 'Please enter a valid email address.';
+        input.classList.add('error');
+        return false;
+      }
+
+      // Validate domain
+      if (!email.endsWith('@lumochange.com')) {
+        errorEl.innerHTML = '&#9888; Access denied. Only @lumochange.com email addresses are permitted.';
+        input.classList.add('error');
+        input.focus();
+        return false;
+      }
+
+      // Success - store auth and redirect
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+      localStorage.setItem('do_auth_email', email);
+      localStorage.setItem('do_auth_time', new Date().toISOString());
+
+      setTimeout(function() {
+        window.location.href = 'index.html';
+      }, 500);
+
+      return false;
+    }
+
+    // Clear error on input
+    document.getElementById('email').addEventListener('input', function() {
+      document.getElementById('error-msg').textContent = '';
+      this.classList.remove('error');
+    });
+  </script>
+</body>
+</html>
