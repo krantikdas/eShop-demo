@@ -116,6 +116,14 @@
   </style>
 </head>
 <body>
+  <script>
+    (function() {
+      var auth = localStorage.getItem('do_auth_email');
+      if (!auth || !auth.endsWith('@lumochange.com')) {
+        window.location.href = 'login.html';
+      }
+    })();
+  </script>
   <div class="topbar">
     <div class="topbar-brand">
       <div class="logo-icon"><img src="dfs_logo.png" alt="DFS" style="width:100%;height:100%;object-fit:contain;"></div>
@@ -133,6 +141,7 @@
         ProgressPack Generated
       </div>
       <span>DFS OMS R1</span>
+      <a href="#" onclick="localStorage.removeItem('do_auth_email');localStorage.removeItem('do_auth_time');window.location.href='login.html';return false;" style="font-size:11px;color:rgba(255,255,255,0.5);text-decoration:none;margin-left:8px;">Sign Out</a>
     </div>
   </div>
 

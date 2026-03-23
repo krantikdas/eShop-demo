@@ -151,6 +151,14 @@
   </style>
 </head>
 <body>
+  <script>
+    (function() {
+      var auth = localStorage.getItem('do_auth_email');
+      if (!auth || !auth.endsWith('@lumochange.com')) {
+        window.location.href = 'login.html';
+      }
+    })();
+  </script>
   <!-- Top bar -->
   <div class="topbar">
     <div class="topbar-brand">
@@ -169,6 +177,7 @@
         Planner Agent Active
       </div>
       <span>DFS OMS R1</span>
+      <a href="#" onclick="localStorage.removeItem('do_auth_email');localStorage.removeItem('do_auth_time');window.location.href='login.html';return false;" style="font-size:11px;color:rgba(255,255,255,0.5);text-decoration:none;margin-left:8px;">Sign Out</a>
     </div>
   </div>
 
