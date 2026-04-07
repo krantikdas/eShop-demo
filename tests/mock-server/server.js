@@ -176,6 +176,24 @@ app.get('/api/catalog/items/withsemanticrelevance', (req, res) => {
   res.json({ pageIndex, pageSize, count: totalItems, data });
 });
 
+// GET /api/catalog/items/type/all/brand/:brandId? - Filter by brand only
+// NOTE: This route MUST be registered before the parameterized :typeId route below
+app.get('/api/catalog/items/type/all/brand/:brandId?', (req, res) => {
+  const brandId = req.params.brandId ? parseInt(req.params.brandId) : null;
+  const pageSize = parseInt(req.query.pageSize) || 10;
+  const pageIndex = parseInt(req.query.pageIndex) || 0;
+
+  let filtered = brandId
+    ? catalogItems.filter(i => i.catalogBrandId === brandId)
+    : [...catalogItems];
+  filtered.sort((a, b) => a.name.localeCompare(b.name));
+
+  const totalItems = filtered.length;
+  const data = filtered.slice(pageSize * pageIndex, pageSize * pageIndex + pageSize);
+
+  res.json({ pageIndex, pageSize, count: totalItems, data });
+});
+
 // GET /api/catalog/items/type/:typeId/brand/:brandId? - Filter by type and brand
 app.get('/api/catalog/items/type/:typeId/brand/:brandId?', (req, res) => {
   const typeId = parseInt(req.params.typeId);
@@ -187,23 +205,6 @@ app.get('/api/catalog/items/type/:typeId/brand/:brandId?', (req, res) => {
   if (brandId) {
     filtered = filtered.filter(i => i.catalogBrandId === brandId);
   }
-  filtered.sort((a, b) => a.name.localeCompare(b.name));
-
-  const totalItems = filtered.length;
-  const data = filtered.slice(pageSize * pageIndex, pageSize * pageIndex + pageSize);
-
-  res.json({ pageIndex, pageSize, count: totalItems, data });
-});
-
-// GET /api/catalog/items/type/all/brand/:brandId? - Filter by brand only
-app.get('/api/catalog/items/type/all/brand/:brandId?', (req, res) => {
-  const brandId = req.params.brandId ? parseInt(req.params.brandId) : null;
-  const pageSize = parseInt(req.query.pageSize) || 10;
-  const pageIndex = parseInt(req.query.pageIndex) || 0;
-
-  let filtered = brandId
-    ? catalogItems.filter(i => i.catalogBrandId === brandId)
-    : [...catalogItems];
   filtered.sort((a, b) => a.name.localeCompare(b.name));
 
   const totalItems = filtered.length;
@@ -573,6 +574,21 @@ app.get('/_test/counts', (_req, res) => {
     orders: orders.length,
     webhookSubscriptions: webhookSubscriptions.length,
   });
+});
+
+// Inspect all orders (bypass auth)
+app.get('/_test/orders', (_req, res) => {
+  res.json(orders);
+});
+
+// Inspect all baskets (bypass auth)
+app.get('/_test/baskets', (_req, res) => {
+  res.json(baskets);
+});
+
+// Inspect integration events emitted (simulated)
+app.get('/_test/events', (_req, res) => {
+  res.json([]);
 });
 
 // ─── Start Server ───────────────────────────────────────────────────────────────
