@@ -12,27 +12,27 @@ export async function assertStatus(response: APIResponse, expectedStatus: number
 
 /** Assert response is 200 OK */
 export async function assertOk(response: APIResponse): Promise<void> {
-  assertStatus(response, 200);
+  await assertStatus(response, 200);
 }
 
 /** Assert response is 201 Created */
 export async function assertCreated(response: APIResponse): Promise<void> {
-  assertStatus(response, 201);
+  await assertStatus(response, 201);
 }
 
 /** Assert response is 204 No Content */
 export async function assertNoContent(response: APIResponse): Promise<void> {
-  assertStatus(response, 204);
+  await assertStatus(response, 204);
 }
 
 /** Assert response is 400 Bad Request */
 export async function assertBadRequest(response: APIResponse): Promise<void> {
-  assertStatus(response, 400);
+  await assertStatus(response, 400);
 }
 
 /** Assert response is 404 Not Found */
 export async function assertNotFound(response: APIResponse): Promise<void> {
-  assertStatus(response, 404);
+  await assertStatus(response, 404);
 }
 
 /** Assert response body is a non-empty array */
